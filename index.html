@@ -1,1014 +1,924 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Volume2, 
-  RotateCcw, 
-  CheckCircle2, 
-  XCircle, 
-  Sparkles, 
   BookOpen, 
-  Info, 
+  Volume2, 
+  CheckCircle, 
+  XCircle, 
+  Award, 
+  ArrowRight, 
   Settings, 
-  FileText, 
-  Eye, 
-  EyeOff, 
-  Plus, 
-  Trash2,
-  Trophy,
-  Activity,
-  UserCheck,
-  ArrowRight
+  Info,
+  History,
+  AlertTriangle,
+  Lightbulb,
+  Play,
+  Sparkles
 } from 'lucide-react';
 
-// Base de dades inicial de problemes ampliada de 1r a 6è (30 problemes per curs)
-// Alguns problemes tenen variables dinàmiques {x}, {y} que es calcularan en temps d'execució per evitar la repetició de dades!
-const PROBLEMES_PLANTILLES = {
-  "1r": [
-    { text: "Tinc {x} caramels de maduixa i {y} de llimona. Quants caramels tinc en total?", gen: () => { const x = _.rand(2, 6); const y = _.rand(2, 5); return { text: `Tinc ${x} caramels de maduixa i ${y} de llimona. Quants caramels tinc en total?`, num: x + y, unitats: ["caramels", "caramel"] }; } },
-    { text: "En una bossa hi ha {x} bales i en perdo {y}. Quantes bales em queden?", gen: () => { const x = _.rand(6, 10); const y = _.rand(2, x - 1); return { text: `En una bossa hi ha ${x} bales i en perdo ${y}. Quantes bales em queden?`, num: x - y, unitats: ["bales", "bala"] }; } },
-    { text: "D'un paquet de {x} galetes, me'n menjo {y}. Quantes galetes em queden?", gen: () => { const x = _.rand(5, 9); const y = _.rand(1, x - 2); return { text: `D'un paquet de ${x} galetes, me'n menjo ${y}. Quantes galetes em queden?`, num: x - y, unitats: ["galetes", "galeta"] }; } },
-    { text: "Tinc {x} llapis de colors i el meu germà em regala {y} més. Quants llapis tinc ara?", gen: () => { const x = _.rand(3, 7); const y = _.rand(2, 5); return { text: `Tinc ${x} llapis de colors i el meu germà em regala ${y} més. Quants llapis tinc ara?`, num: x + y, unitats: ["llapis"] }; } },
-    { text: "Si en una taula hi ha {x} gats i en marxen {y}, quants gats queden a la taula?", gen: () => { const x = _.rand(4, 8); const y = _.rand(1, x - 1); return { text: `Si en una taula hi ha ${x} gats i en marxen ${y}, quants gats queden a la taula?`, num: x - y, unitats: ["gats", "gat"] }; } },
-    { text: "Tinc {x} globus vermells i {y} globus blaus. Quants globus tinc en total?", gen: () => { const x = _.rand(2, 6); const y = _.rand(2, 6); return { text: `Tinc ${x} globus vermells i ${y} globus blaus. Quants globus tinc en total?`, num: x + y, unitats: ["globus"] }; } },
-    { text: "En un arbre hi ha {x} ocells. En volen {y}. Quants ocells queden a l'arbre?", gen: () => { const x = _.rand(5, 9); const y = _.rand(1, x - 1); return { text: `En un arbre hi ha ${x} ocells. En volen ${y}. Quants ocells queden a l'arbre?`, num: x - y, unitats: ["ocells", "ocell"] }; } },
-    { text: "La Maria té {x} nines i en Joan en té {y}. Quantes nines tenen entre tots dos?", gen: () => { const x = _.rand(2, 5); const y = _.rand(2, 5); return { text: `La Maria té ${x} nines i en Joan en té ${y}. Quantes nines tenen entre tots dos?`, num: x + y, unitats: ["nines", "nina"] }; } },
-    { text: "Tinc {x} adhesius i en faig servir {y}. Quants adhesius em queden?", gen: () => { const x = _.rand(5, 10); const y = _.rand(1, x - 1); return { text: `Tinc ${x} adhesius i en faig servir ${y}. Quants adhesius em queden?`, num: x - y, unitats: ["adhesius", "adhesiu"] }; } },
-    { text: "En un test hi ha {x} flors grogues i {y} de vermelles. Quantes flors hi ha en total?", gen: () => { const x = _.rand(2, 6); const y = _.rand(2, 6); return { text: `En un test hi ha ${x} flors grogues i ${y} de vermelles. Quantes flors hi ha en total?`, num: x + y, unitats: ["flors", "flor"] }; } },
-    { text: "Tinc {x} pomes i me'n menjo {y}. Quantes pomes em queden?", gen: () => { const x = _.rand(4, 8); const y = _.rand(1, 3); return { text: `Tinc ${x} pomes i me'n menjo ${y}. Quantes pomes em queden?`, num: x - y, unitats: ["pomes", "poma"] }; } },
-    { text: "Al pati hi ha {x} nens jugant a futbol i {y} a la sorra. Quants nens hi ha en total?", gen: () => { const x = _.rand(3, 7); const y = _.rand(2, 5); return { text: `Al pati hi ha ${x} nens jugant a futbol i ${y} a la sorra. Quants nens hi ha en total?`, num: x + y, unitats: ["nens", "nen", "nena", "nenes"] }; } },
-    { text: "La meva germana té {x} anys i jo en tinc {y} més que ella. Quants anys tinc jo?", gen: () => { const x = _.rand(4, 7); const y = _.rand(1, 3); return { text: `La meva germana té ${x} anys i jo en tinc ${y} més que ella. Quants anys tinc jo?`, num: x + y, unitats: ["anys", "any"] }; } },
-    { text: "En una caixa hi ha {x} joguines i en traiem {y}. Quantes joguines queden a la caixa?", gen: () => { const x = _.rand(6, 10); const y = _.rand(2, 4); return { text: `En una caixa hi ha ${x} joguines i en traiem ${y}. Quantes joguines queden a la caixa?`, num: x - y, unitats: ["joguines", "joguina"] }; } },
-    { text: "En una branca hi ha {x} ocells i en arriben {y} més. Quants ocells hi ha ara?", gen: () => { const x = _.rand(3, 6); const y = _.rand(2, 5); return { text: `En una branca hi ha ${x} ocells i en arriben ${y} més. Quants ocells hi ha ara?`, num: x + y, unitats: ["ocells", "ocell"] }; } },
-    { text: "Tinc {x} xocolatines i en dono {y} al meu amic. Quantes xocolatines em queden?", gen: () => { const x = _.rand(5, 8); const y = _.rand(1, 3); return { text: `Tinc ${x} xocolatines i en dono ${y} al meu amic. Quantes xocolatines em queden?`, num: x - y, unitats: ["xocolatines", "xocolatina"] }; } },
-    { text: "Dalt d'un bosc hi ha {x} pins i {y} alzines. Quants arbres hi ha en total?", gen: () => { const x = _.rand(3, 6); const y = _.rand(3, 5); return { text: `Dalt d'un bosc hi ha ${x} pins i ${y} alzines. Quants arbres hi ha en total?`, num: x + y, unitats: ["arbres", "arbre"] }; } },
-    { text: "Si tinc {x} llapis i en faig punta a {y}, quants llapis em queden sense fer punta?", gen: () => { const x = _.rand(6, 10); const y = _.rand(1, 4); return { text: `Si tinc ${x} llapis i en faig punta a ${y}, quants llapis em queden sense fer punta?`, num: x - y, unitats: ["llapis"] }; } },
-    { text: "En una bassa hi neden {x} ànecs i s'hi afegeixen {y} més. Quants ànecs hi ha ara?", gen: () => { const x = _.rand(2, 6); const y = _.rand(2, 4); return { text: `En una bassa hi neden ${x} ànecs i s'hi afegeixen ${y} més. Quants ànecs hi ha ara?`, num: x + y, unitats: ["ànecs", "anecs", "ànec", "anec"] }; } },
-    { text: "Tinc {x} llibres a la motxilla i en trec {y}. Quants llibres queden dins la motxilla?", gen: () => { const x = _.rand(4, 7); const y = _.rand(1, 3); return { text: `Tinc ${x} llibres a la motxilla i en trec ${y}. Quants llibres queden dins la motxilla?`, num: x - y, unitats: ["llibres", "llibre"] }; } },
-    { text: "El meu gos té {x} pilotes i en perd {y}. Quantes pilotes li queden?", gen: () => { const x = _.rand(3, 6); const y = _.rand(1, 2); return { text: `El meu gos té ${x} pilotes i en perd ${y}. Quantes pilotes li queden?`, num: x - y, unitats: ["pilotes", "pilota"] }; } },
-    { text: "Tinc {x} maduixes i en collo {y} més de l'hort. Quantes maduixes tinc ara?", gen: () => { const x = _.rand(4, 7); const y = _.rand(2, 4); return { text: `Tinc ${x} maduixes i en collo ${y} més de l'hort. Quantes maduixes tinc ara?`, num: x + y, unitats: ["maduixes", "maduixa"] }; } },
-    { text: "D'un ram de {x} roses, se n'assequen {y}. Quantes roses queden de viues?", gen: () => { const x = _.rand(5, 9); const y = _.rand(1, 3); return { text: `D'un ram de ${x} roses, se n'assequen ${y}. Quantes roses queden de viues?`, num: x - y, unitats: ["roses", "rosa"] }; } },
-    { text: "A taula hi ha {x} plats i en posem {y} més. Quants plats hi ha ara en total?", gen: () => { const x = _.rand(4, 6); const y = _.rand(2, 4); return { text: `A taula hi ha ${x} plats i en posem ${y} més. Quants plats hi ha ara en total?`, num: x + y, unitats: ["plats", "plat"] }; } },
-    { text: "Tinc {x} adhesius rodons i {y} de quadrats. Quants adhesius tinc en total?", gen: () => { const x = _.rand(3, 6); const y = _.rand(2, 5); return { text: `Tinc ${x} adhesius rodons i ${y} de quadrats. Quants adhesius tinc en total?`, num: x + y, unitats: ["adhesius", "adhesiu"] }; } },
-    { text: "En un prestatge hi ha {x} gots. Si en cauen i es trenquen {y}, quants gots sencers queden?", gen: () => { const x = _.rand(5, 8); const y = _.rand(1, 2); return { text: `En un prestatge hi ha ${x} gots. Si en cauen i es trenquen ${y}, quants gots sencers queden?`, num: x - y, unitats: ["gots", "got"] }; } },
-    { text: "Tinc {x} cotxes de joguina i me'n regalen {y}. Quants cotxes tinc en total?", gen: () => { const x = _.rand(3, 7); const y = _.rand(2, 4); return { text: `Tinc ${x} cotxes de joguina i me'n regalen ${y}. Quants cotxes tinc en total?`, num: x + y, unitats: ["cotxes", "cotxe"] }; } },
-    { text: "A la classe hi ha {x} cadires buides i {y} d'ocupades. Quantes cadires hi ha en total?", gen: () => { const x = _.rand(2, 6); const y = _.rand(4, 8); return { text: `A la classe hi ha ${x} cadires buides i ${y} d'ocupades. Quantes cadires hi ha en total?`, num: x + y, unitats: ["cadires", "cadira"] }; } },
-    { text: "D'un niu amb {x} ous, en neixen {y} ocellets. Quants ous queden per obrir?", gen: () => { const x = _.rand(4, 7); const y = _.rand(1, 3); return { text: `D'un niu amb ${x} ous, en neixen ${y} ocellets. Quants ous queden per obrir?`, num: x - y, unitats: ["ous", "ou"] }; } },
-    { text: "En un calaix hi ha {x} mitjons vermells i {y} blaus. Quants mitjons hi ha en total?", gen: () => { const x = _.rand(4, 8); const y = _.rand(2, 5); return { text: `En un calaix hi ha ${x} mitjons vermells i ${y} blaus. Quants mitjons hi ha en total?`, num: x + y, unitats: ["mitjons", "mitjo", "mitjó"] }; } }
-  ],
-  "2n": [
-    { text: "Si un caramel costa {x} cèntims, quants cèntims costaran 2 caramels?", gen: () => { const x = _.rand(3, 9); return { text: `Si un caramel costa ${x} cèntims, quants cèntims costaran 2 caramels?`, num: x * 2, unitats: ["cèntims", "centims", "cèntim", "centim"] }; } },
-    { text: "En una caixa hi ha {x} retoladors i en una altra n'hi ha {y}. Quants retoladors hi ha en total?", gen: () => { const x = _.rand(8, 15); const y = _.rand(4, 12); return { text: `En una caixa hi ha ${x} retoladors i en una altra n'hi ha ${y}. Quants retoladors hi ha en total?`, num: x + y, unitats: ["retoladors", "retolador"] }; } },
-    { text: "La mare ha comprat {x} plàtans i ens n'hem menjat {y}. Quants plàtans queden?", gen: () => { const x = _.rand(10, 18); const y = _.rand(2, 6); return { text: `La mare ha comprat ${x} plàtans i ens n'hem menjat ${y}. Quants plàtans queden?`, num: x - y, unitats: ["plàtans", "platans", "plàtan", "platan"] }; } },
-    { text: "Tinc {x} cromos. Si en perdo la meitat, quants cromos em queden?", gen: () => { const x = _.randEven(6, 20); return { text: `Tinc ${x} cromos. Si en perdo la meitat, quants cromos em queden?`, num: x / 2, unitats: ["cromos", "cromo"] }; } },
-    { text: "Tinc {x} llibretes vermelles, {y} de blaves i {z} de verdes. Quantes llibretes tinc en total?", gen: () => { const x = _.rand(2, 6); const y = _.rand(2, 6); const z = _.rand(2, 6); return { text: `Tinc ${x} llibretes vermelles, ${y} de blaves i ${z} de verdes. Quantes llibretes tinc en total?`, num: x + y + z, unitats: ["llibretes", "llibreta"] }; } },
-    { text: "En un prestatge hi ha {x} llibres. Si n'agafo {y} per llegir, quants llibres queden?", gen: () => { const x = _.rand(11, 19); const y = _.rand(3, 8); return { text: `En un prestatge hi ha ${x} llibres. Si n'agafo ${y} per llegir, quants llibres queden?`, num: x - y, unitats: ["llibres", "llibre"] }; } },
-    { text: "Tinc {x} bosses. A cada bossa hi ha 5 bales. Quantes bales tinc en total?", gen: () => { const x = _.rand(2, 6); return { text: `Tinc ${x} bosses. A cada bossa hi ha 5 bales. Quantes bales tinc en total?`, num: x * 5, unitats: ["bales", "bala"] }; } },
-    { text: "Un pastís es talla en {x} trossos. Si en mengem {y}, quants trossos queden?", gen: () => { const x = _.rand(6, 12); const y = _.rand(2, 5); return { text: `Un pastís es talla en ${x} trossos. Si en mengem ${y}, quants trossos queden?`, num: x - y, unitats: ["trossos", "tros"] }; } },
-    { text: "La Joana té {x} llapis i en dóna {y} al seu amic. Quants llapis li queden a la Joana?", gen: () => { const x = _.rand(12, 20); const y = _.rand(2, 7); return { text: `La Joana té ${x} llapis i en dóna ${y} al seu amic. Quants llapis li queden a la Joana?`, num: x - y, unitats: ["llapis"] }; } },
-    { text: "En un galliner hi ha {x} gallines. Si {y} d'elles surten a passejar, quantes gallines queden dins?", gen: () => { const x = _.rand(10, 16); const y = _.rand(2, 6); return { text: `En un galliner hi ha ${x} gallines. Si ${y} d'elles surten a passejar, quantes gallines queden dins?`, num: x - y, unitats: ["gallines", "gallina"] }; } },
-    { text: "Si un xiclet costa {x} cèntims, quants cèntims costaran 3 xiclets?", gen: () => { const x = _.rand(3, 8); return { text: `Si un xiclet costa ${x} cèntims, quants cèntims costaran 3 xiclets?`, num: x * 3, unitats: ["cèntims", "centims", "cèntim", "centim"] }; } },
-    { text: "En una fila hi ha {x} nens. Se n'hi afegeixen {y} més. Quants nens hi ha ara a la fila?", gen: () => { const x = _.rand(8, 14); const y = _.rand(4, 9); return { text: `En una fila hi ha ${x} nens. Se n'hi afegeixen ${y} més. Quants nens hi ha ara a la fila?`, num: x + y, unitats: ["nens", "nen", "nena", "nenes"] }; } },
-    { text: "Tinc {x} cromos de football i el meu pare me'n regala {y} de nous. Quants cromos tinc ara?", gen: () => { const x = _.rand(10, 20); const y = _.rand(5, 12); return { text: `Tinc ${x} cromos de futbol i el meu pare me'n regala ${y} de nous. Quants cromos tinc ara?`, num: x + y, unitats: ["cromos", "cromo"] }; } },
-    { text: "En un autobús hi viatgen {x} persones. A la primera parada en baixen {y}. Quantes persones queden a l'autobús?", gen: () => { const x = _.rand(15, 25); const y = _.rand(3, 9); return { text: `En un autobús hi viatgen ${x} persones. A la primera parada en baixen ${y}. Quantes persones queden a l'autobús?`, num: x - y, unitats: ["persones", "persona"] }; } },
-    { text: "Si tinc {x} gometes de colors i en faig servir la meitat, quantes gometes em queden?", gen: () => { const x = _.randEven(8, 24); return { text: `Si tinc {x} gometes de colors i en faig servir la meitat, quantes gometes em queden?`, num: x / 2, unitats: ["gometes", "gometa", "gomets", "gomet"] }; } },
-    { text: "Dues nines costen {x} euros cadascuna. Quants euros costen les dures nines?", gen: () => { const x = _.rand(5, 12); return { text: `Dues nines costen ${x} euros cadascuna. Quants euros costen les dues nines?`, num: x * 2, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc {x} bales blaves i {y} vermelles. Si en regalo {z} a la meva cosina, quantes bales em queden?", gen: () => { const x = _.rand(4, 8); const y = _.rand(4, 8); const total = x + y; const z = _.rand(2, 5); return { text: `Tinc ${x} bales blaves i ${y} vermelles. Si en regalo ${z} a la meva cosina, quantes bales em queden?`, num: total - z, unitats: ["bales", "bala"] }; } },
-    { text: "Un pagès té {x} ovelles. Se'n venen {y}. Quantes ovelles li queden?", gen: () => { const x = _.rand(12, 22); const y = _.rand(3, 8); return { text: `Un pagès té ${x} ovelles. Se'n venen ${y}. Quantes ovelles li queden?`, num: x - y, unitats: ["ovelles", "ovella"] }; } },
-    { text: "Tinc {x} caixes de colors i a cada caixa hi ha 6 colors. Quants colors tinc en total?", gen: () => { const x = _.rand(2, 5); return { text: `Tinc ${x} caixes de colors i a cada caixa hi ha 6 colors. Quants colors tinc en total?`, num: x * 6, unitats: ["colors", "color"] }; } },
-    { text: "Ahir vaig llegir {x} pàgines d'un llibre i avui n'he llegit {y}. Quantes pàgines he llegit en total?", gen: () => { const x = _.rand(8, 15); const y = _.rand(5, 12); return { text: `Ahir vaig lIegir ${x} pàgines d'un llibre i avui n'he llegit ${y}. Quantes pàgines he lIegit en total?`, num: x + y, unitats: ["pàgines", "pagines", "pàgina", "pagina"] }; } },
-    { text: "Tinc {x} globus. Si se n'exploten la meitat, quants globus em queden?", gen: () => { const x = _.randEven(6, 18); return { text: `Tinc ${x} globus. Si se n'exploten la meitat, quants globus em queden?`, num: x / 2, unitats: ["globus"] }; } },
-    { text: "D'un paquet de {x} folis, en fem servir {y} per dibuixar. Quants folis ens queden?", gen: () => { const x = _.rand(20, 30); const y = _.rand(5, 12); return { text: `D'un paquet de ${x} folis, en fem servir ${y} per dibuixar. Quants folis ens queden?`, num: x - y, unitats: ["folis", "foli"] }; } },
-    { text: "Tinc {x} bitllets de 5 euros. Quants euros tinc en total?", gen: () => { const x = _.rand(2, 6); return { text: `Tinc ${x} bitllets de 5 euros. Quants euros tinc en total?`, num: x * 5, unitats: ["euros", "euro", "€"] }; } },
-    { text: "En un niu hi havia {x} ous i n'han nascut la meitat. Quants ous queden per néixer?", gen: () => { const x = _.randEven(4, 12); return { text: `En un niu hi havia ${x} ous i n'han nascut la meitat. Quants ous queden per néixer?`, num: x / 2, unitats: ["ous", "ou"] }; } },
-    { text: "Un llibre té {x} capítols i ja n'he llegit {y}. Quants capítols em queden per llegir?", gen: () => { const x = _.rand(10, 15); const y = _.rand(2, 5); return { text: `Un llibre té ${x} capítols i ja n'he llegit ${y}. Quants capítols em queden per llegir?`, num: x - y, unitats: ["capítols", "capitols", "capítol", "capitol"] }; } },
-    { text: "En un prestatge hi caben {x} ampolles. Si ja n'hi ha {y}, quantes ampolles més hi podem posar?", gen: () => { const x = _.rand(15, 25); const y = _.rand(10, 14); return { text: `En un prestatge hi caben ${x} ampolles. Si ja n'hi ha ${y}, quantes ampolles més hi podem posar?`, num: x - y, unitats: ["ampolles", "ampolla"] }; } },
-    { text: "Tinc {x} pomes vermelles i el meu germà té el doble de pomes que jo. Quantes pomes té el meu germà?", gen: () => { const x = _.rand(3, 8); return { text: `Tinc ${x} pomes vermelles i el meu germà té el doble de pomes que jo. Quantes pomes té el meu germà?`, num: x * 2, unitats: ["pomes", "poma"] }; } },
-    { text: "Si compro un suc de {x} cèntims i pago amb una moneda de 50 cèntims, quants cèntims em tornaran?", gen: () => { const x = _.rand(30, 45); return { text: `Si compro un suc de ${x} cèntims i pago amb una moneda de 50 cèntims, quants cèntims em tornaran?`, num: 50 - x, unitats: ["cèntims", "centims", "cèntim", "centim"] }; } },
-    { text: "A l'escola de música hi ha {x} violins i en compren {y} de nous. Quants violins hi ha ara?", gen: () => { const x = _.rand(8, 15); const y = _.rand(3, 7); return { text: `A l'escola de música hi ha ${x} violins i en compren ${y} de nous. Quants violins hi ha ara?`, num: x + y, unitats: ["violins", "violí", "violi"] }; } },
-    { text: "En una lliga de bàsquet juguen {x} equips i se n'hi apunten {y} més. Quants equips hi ha en total?", gen: () => { const x = _.rand(6, 12); const y = _.rand(2, 5); return { text: `En una lliga de bàsquet juguen ${x} equips i se n'hi apunten ${y} més. Quants equips hi ha en total?`, num: x + y, unitats: ["equips", "equip"] }; } }
-  ],
-  "3r": [
-    { text: "Tinc {x} paquets de xiclets. A cada paquet hi ha {y} xiclets. Quants xiclets tinc en total?", gen: () => { const x = _.rand(3, 6); const y = _.rand(4, 8); return { text: `Tinc ${x} paquets de xiclets. A cada paquet hi ha ${y} xiclets. Quants xiclets tinc en total?`, num: x * y, unitats: ["xiclets", "xiclet"] }; } },
-    { text: "Si reparteixo {x} caramels entre {y} nens, quants caramels corresponen a cadascun?", gen: () => { const y = _.rand(3, 5); const num = _.rand(3, 6); const x = num * y; return { text: `Si reparteixo ${x} caramels entre ${y} nens, quants caramels corresponen a cadascun?`, num: num, unitats: ["caramels", "caramel"] }; } },
-    { text: "Tinc {x} euros. Si em compro un llibre de {y} euros, quants euros em quedaran?", gen: () => { const x = _.rand(20, 45); const y = _.rand(11, 19); return { text: `Tinc ${x} euros. Si em compro un llibre de ${y} euros, quants euros em quedaran?`, num: x - y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "En una prestatgeria hi ha {x} files amb {y} llibres a cada fila. Quants llibres hi ha en total?", gen: () => { const x = _.rand(3, 5); const y = _.rand(8, 12); return { text: `En una prestatgeria hi ha ${x} files amb ${y} llibres a cada fila. Quants llibres hi ha en total?`, num: x * y, unitats: ["llibres", "llibre"] }; } },
-    { text: "Tinc la meitat de {x} anys. Quants anys tinc?", gen: () => { const x = _.randEven(12, 30); return { text: `Tinc la meitat de ${x} anys. Quants anys tinc?`, num: x / 2, unitats: ["anys", "any"] }; } },
-    { text: "Si una llibreta val {x} euros, quants euros em costaran {y} llibretes?", gen: () => { const x = _.rand(2, 4); const y = _.rand(6, 10); return { text: `Si una llibreta val ${x} euros, quants euros em costaran ${y} llibretes?`, num: x * y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "D'una corda de {x} metres, en tallo un tros de {y} metres. Quants metres de corda queden?", gen: () => { const x = _.rand(30, 60); const y = _.rand(11, 25); return { text: `D'una corda de ${x} metres, en tallo un tros de ${y} metres. Quants metres de corda queden?`, num: x - y, unitats: ["metres", "metre", "m"] }; } },
-    { text: "En una cursa hi participen {x} cotxes. Si en abandonen {y}, quants cotxes acaben la cursa?", gen: () => { const x = _.rand(15, 30); const y = _.rand(2, 8); return { text: `En una cursa hi participen ${x} cotxes. Si en abandonen ${y}, quants cotxes acaben la cursa?`, num: x - y, unitats: ["cotxes", "cotxe"] }; } },
-    { text: "Tinc {x} bitllets de 5 euros. Quants euros tinc en total?", gen: () => { const x = _.rand(4, 9); return { text: `Tinc ${x} bitllets de 5 euros. Quants euros tinc en total?`, num: x * 5, unitats: ["euros", "euro", "€"] }; } },
-    { text: "En un formiguer hi havia {x} formigues. Si en surten la meitat, quantes formigues queden a dins?", gen: () => { const x = _.randEven(20, 50); return { text: `En un formiguer hi havia ${x} formigues. Si en surten la meitat, quantes formigues queden a dins?`, num: x / 2, unitats: ["formigues", "formiga"] }; } },
-    { text: "Si compro {x} llapis a {y} euros cadascun, quants euros hauré de pagar?", gen: () => { const x = _.rand(3, 6); const y = _.rand(3, 7); return { text: `Si compro ${x} llapis a ${y} euros cadascun, quants euros hauré de pagar?`, num: x * y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "La mare compra {x} caixes d'ous. A cada caixa hi ha 6 ous. Quants ous té en total?", gen: () => { const x = _.rand(4, 9); return { text: `La mare compra ${x} caixes d'ous. A cada caixa hi ha 6 ous. Quants ous té en total?`, num: x * 6, unitats: ["ous", "ou"] }; } },
-    { text: "Si reparteixo {x} globus a {y} nens a parts iguals, quants globus toquen a cadascú?", gen: () => { const y = _.rand(2, 5); const num = _.rand(4, 8); const x = num * y; return { text: `Si reparteixo ${x} globus a ${y} nens a parts iguals, quants globus toquen a cadascú?`, num: num, unitats: ["globus"] }; } },
-    { text: "En un calaix tinc {x} mitjons. Quants parells de mitjons puc fer?", gen: () => { const x = _.randEven(12, 30); return { text: `En un calaix tinc ${x} mitjons. Quants parells de mitjons puc fer?`, num: x / 2, unitats: ["parells", "parell", "parells de mitjons"] }; } },
-    { text: "Tinc {x} cromos de dinosaures i el meu amic en té el triple. Quants cromos té el meu amic?", gen: () => { const x = _.rand(5, 10); return { text: `Tinc ${x} cromos de dinosaures i el meu amic en té el triple. Quants cromos té el meu amic?`, num: x * 3, unitats: ["cromos", "cromo"] }; } },
-    { text: "En un camp d'avellaners hi ha {x} rengles amb {y} arbres a cada rengle. Quants avellaners hi ha en total?", gen: () => { const x = _.rand(4, 7); const y = _.rand(5, 8); return { text: `En un camp d'avellaners hi ha ${x} rengles amb ${y} arbres a cada rengle. Quants avellaners hi ha en total?`, num: x * y, unitats: ["avellaners", "avellaner", "arbres", "arbre"] }; } },
-    { text: "Tinc {x} còmics i en guardo {y} a cada caixa. Quantes caixes faré servir?", gen: () => { const y = _.rand(3, 6); const num = _.rand(4, 8); const x = num * y; return { text: `Tinc ${x} còmics i en guardo ${y} a cada caixa. Quantes caixes faré servir?`, num: num, unitats: ["caixes", "caixa"] }; } },
-    { text: "D'un camí de {x} metres, ja n'hem pavimentat {y} metres. Quants metres queden per pavimentar?", gen: () => { const x = _.rand(60, 100); const y = _.rand(20, 45); return { text: `D'un camí de ${x} metres, ja n'hem pavimentat ${y} metres. Quants metres queden per pavimentar?`, num: x - y, unitats: ["metres", "metre", "m"] }; } },
-    { text: "Un formatge rodó es divideix en {x} trossos iguals. Si en guardem la meitat, quants trossos queden fora?", gen: () => { const x = _.randEven(8, 20); return { text: `Un formatge rodó es divideix en ${x} trossos iguals. Si en guardem la meitat, quants trossos queden fora?`, num: x / 2, unitats: ["trossos", "tros"] }; } },
-    { text: "Un grup de {x} nens es divideix en equips de {y} jugadors. Quants equips podem formar?", gen: () => { const y = _.rand(3, 5); const num = _.rand(4, 8); const x = num * y; return { text: `Un grup de ${x} nens es divideix en equips de ${y} jugadors. Quants equips podem formar?`, num: num, unitats: ["equips", "equip"] }; } },
-    { text: "Si un bitllet de tren d'anada i tornada costa {x} euros, quants euros costaran {y} bitllets?", gen: () => { const x = _.rand(6, 12); const y = _.rand(2, 4); return { text: `Si un bitllet de tren d'anada i tornada costa ${x} euros, quants euros costaran ${y} bitllets?`, num: x * y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc 2 bitllets de 20 euros i en gasto {x}. Quants euros em queden?", gen: () => { const x = _.rand(15, 30); return { text: `Tinc 2 bitllets de 20 euros i en gasto ${x}. Quants euros em queden?`, num: 40 - x, unitats: ["euros", "euro", "€"] }; } },
-    { text: "En un bosc hi ha {x} roures. Si en tallen una tercera part, quants roures tallen?", gen: () => { const num = _.rand(5, 12); const x = num * 3; return { text: `En un bosc hi ha ${x} roures. Si en tallen una tercera part, quants roures tallen?`, num: num, unitats: ["roures", "roure"] }; } },
-    { text: "Un mecànic té {x} rodes de recanvi. Quants cotxes pot equipar sencers de 4 rodes?", gen: () => { const num = _.rand(4, 8); const x = num * 4; return { text: `Un mecànic té ${x} rodes de recanvi. Quants cotxes pot equipar sencers de 4 rodes?`, num: num, unitats: ["cotxes", "cotxe"] }; } },
-    { text: "La meva cosina té {x} anys i la seva mare en té el triple. Quants anys té la seva mare?", gen: () => { const x = _.rand(8, 12); return { text: `La meva cosina té ${x} anys i la seva mare en té el triple. Quants anys té la seva mare?`, num: x * 3, unitats: ["anys", "any"] }; } },
-    { text: "Tinc {x} cromos repetits i los reparteixo de manera igual entre {y} amics. Quants cromos dono a cadascú?", gen: () => { const y = _.rand(3, 6); const num = _.rand(3, 7); const x = num * y; return { text: `Tinc ${x} cromos repetits i els reparteixo de manera igual entre ${y} amics. Quants cromos dono a cadascú?`, num: num, unitats: ["cromos", "cromo"] }; } },
-    { text: "Una setmana sencera de set dies, quantes hores de pati té en total si cada dia hi ha {x} hores de pati?", gen: () => { const x = _.rand(2, 3); return { text: `Una setmana sencera de set dies, quantes hores de pati té en total si cada dia hi ha ${x} hores de pati?`, num: x * 7, unitats: ["hores", "hora", "h"] }; } },
-    { text: "D'una caixa de {x} brotxes de pintura, la meitat s'han gastat. Quantes brotxes queden de noves?", gen: () => { const x = _.randEven(12, 30); return { text: `D'una caixa de ${x} brotxes de pintura, la meitat s'han gastat. Quantes brotxes queden de noves?`, num: x / 2, unitats: ["brotxes", "brotxa", "brosses", "brossa"] }; } },
-    { text: "Si un quilo d'arròs val {x} euros, quants euros costaran 5 quilos d'arròs?", gen: () => { const x = _.rand(2, 4); return { text: `Si un quilo d'arròs val ${x} euros, quants euros costaran 5 quilos d'arròs?`, num: x * 5, unitats: ["euros", "euro", "€"] }; } },
-    { text: "En un celler hi ha {x} ampolles de suc. Si en venem la meitat, quantes ampolles queden?", gen: () => { const x = _.randEven(30, 80); return { text: `En un celler hi ha ${x} ampolles de suc. Si en venem la meitat, quantes ampolles queden?`, num: x / 2, unitats: ["ampolles", "ampolla"] }; } }
-  ],
-  "4t": [
-    { text: "Tinc {x} estoigs de retoladors. A cada estoig hi ha {y} retoladors. Quants retoladors tinc en total?", gen: () => { const x = _.rand(4, 8); const y = _.rand(6, 10); return { text: `Tinc ${x} estoigs de retoladors. A cada estoig hi ha ${y} retoladors. Quants retoladors tinc en total?`, num: x * y, unitats: ["retoladors", "retolador"] }; } },
-    { text: "Si un bitllet d'autobús costa {x} euros, quants euros costaran {y} bitllets?", gen: () => { const x = _.rand(2, 4); const y = _.rand(11, 15); return { text: `Si un bitllet d'autobús costa ${x} euros, quants euros costaran ${y} bitllets?`, num: x * y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc {x} euros i em gasto {y} euros en un joc. Quants euros em queden?", gen: () => { const x = _.rand(50, 95); const y = _.rand(15, 35); return { text: `Tinc ${x} euros i em gasto ${y} euros en un joc. Quants euros em queden?`, num: x - y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Un pagès recull {x} ous i els col·loca en oueres de {y} ous cada una. Quantes oueres omplirà?", gen: () => { const y = 6; const num = _.rand(6, 12); const x = num * y; return { text: `Un pagès recull ${x} ous i els col·loca en oueres de ${y} ous cada una. Quantes oueres omplirà?`, num: num, unitats: ["oueres", "ouera"] }; } },
-    { text: "Tinc el triple d'adhesius que el meu germà. Si el en té {x}, quants en tinc jo?", gen: () => { const x = _.rand(7, 14); return { text: `Tinc el triple d'adhesius que el meu germà. Si el en té ${x}, quants en tinc jo?`, num: x * 3, unitats: ["adhesius", "adhesiu"] }; } },
-    { text: "D'un dipòsit de {x} litres d'aigua, se'n buiden la meitat. Quants litres d'aigua queden?", gen: () => { const x = _.randEven(50, 150); return { text: `D'un dipòsit de ${x} litres d'aigua, se'n buiden la meitat. Quants litres d'aigua queden?`, num: x / 2, unitats: ["litres", "litre", "l"] }; } },
-    { text: "Si comprem {x} llibres de {y} euros cadascun i paguem amb un bitllet de 50 euros, quants euros ens tornaran?", gen: () => { const x = 3; const y = _.rand(11, 15); return { text: `Si comprem ${x} llibres de ${y} euros cadascun i paguem amb un bitllet de 50 euros, quants euros ens tornaran?`, num: 50 - (x * y), unitats: ["euros", "euro", "€"] }; } },
-    { text: "Una capsa té {x} files de bombons, i a cada fila hi ha {y} bombons. Quants bombons hi ha a la capsa?", gen: () => { const x = _.rand(4, 6); const y = _.rand(6, 10); return { text: `Una capsa té ${x} files de bombons, i a cada fila hi ha ${y} bombons. Quants bombons hi ha a la capsa?`, num: x * y, unitats: ["bombons", "bombo", "bombó"] }; } },
-    { text: "En una classe de {x} alumnes, una cinquena part porta ulleres. Quants alumnes porten ulleres?", gen: () => { const num = _.rand(4, 7); const x = num * 5; return { text: `En una classe de ${x} alumnes, una cinquena part porta ulleres. Quants alumnes porten ulleres?`, num: num, unitats: ["alumnes", "alumne", "alumna", "alumnes"] }; } },
-    { text: "En un hort hi ha {x} rengles de tomaqueres amb {y} tomaqueres a cada rengle. Quantes tomaqueres hi ha en total?", gen: () => { const x = _.rand(6, 9); const y = _.rand(5, 8); return { text: `En un hort hi ha ${x} rengles de tomaqueres amb ${y} tomaqueres a cada rengle. Quantes tomaqueres hi ha en total?`, num: x * y, unitats: ["tomaqueres", "tomaquera"] }; } },
-    { text: "Una modista compra {x} paquets de botons. A cada paquet hi ha {y} botons. Quants botons té en total?", gen: () => { const x = _.rand(5, 10); const y = _.rand(8, 12); return { text: `Una modista compra ${x} paquets de botons. A cada paquet hi ha ${y} botons. Quants botons té en total?`, num: x * y, unitats: ["botons", "boto", "botó"] }; } },
-    { text: "En un teatre hi ha {x} butaques. Si n'hi ha {y} d'ocupades, quantes butaques queden de buides?", gen: () => { const x = _.rand(100, 200); const y = _.rand(60, x - 20); return { text: `En un teatre hi ha ${x} butaques. Si n'hi ha ${y} d'ocupades, quantes butaques queden de buides?`, num: x - y, unitats: ["butaques", "butaca", "buides"] }; } },
-    { text: "Si un diari costa 1,50 euros, quants euros ens costaran {y} diaris?", gen: () => { const y = _.rand(2, 5); return { text: `Si un diari costa 1,50 euros, quants euros ens costaran ${y} diaris?`, num: 1.5 * y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc {x} cromos. Si en dono una quarta part al meu germà, quants cromos li dono?", gen: () => { const num = _.rand(5, 12); const x = num * 4; return { text: `Tinc ${x} cromos. Si en dono una quarta part al meu germà, quants cromos li dono?`, num: num, unitats: ["cromos", "cromo"] }; } },
-    { text: "Si fem {x} caixes amb 12 ampolles de refresc a cadascuna, quantes ampolles de refresc tenim en total?", gen: () => { const x = _.rand(4, 8); return { text: `Si fem ${x} caixes amb 12 ampolles de refresc a cadascuna, quantes ampolles de refresc tenim en total?`, num: x * 12, unitats: ["ampolles", "ampolla", "refrescs", "refresc"] }; } },
-    { text: "D'un llibre de {x} pàgines, ja n'he llegit una tercera part. Quantes pàgines he llegit?", gen: () => { const num = _.rand(20, 40); const x = num * 3; return { text: `D'un llibre de ${x} pàgines, ja n'he llegit una tercera part. Quantes pàgines he llegit?`, num: num, unitats: ["pàgines", "pagines", "pàgina", "pagina"] }; } },
-    { text: "Si un bitllet d'entrada al museu costa {x} euros i hi anem un grup de {y} amics, quants euros haurem de pagar entre tots?", gen: () => { const x = _.rand(6, 9); const y = _.rand(5, 8); return { text: `Si un bitllet d'entrada al museu costa ${x} euros i hi anem un grup de ${y} amics, quants euros haurem de pagar entre tots?`, num: x * y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc {x} roses i les vull posar en testos de 5 roses cadascun. Quants testos faré servir?", gen: () => { const num = _.rand(5, 12); const x = num * 5; return { text: `Tinc ${x} roses i les vull posar en testos de 5 roses cadascun. Quants testos faré servir?`, num: num, unitats: ["testos", "test", "florers", "florer"] }; } },
-    { text: "En un magatzem hi havia 50 televisors. Si en venem el triple que la setmana passada, que se'n van vendre {y}, quants televisors queden ara al magatzem?", gen: () => { const y = _.rand(8, 12); return { text: `En un magatzem hi havia 50 televisors. Si en venem el triple que la setmana passada, que se'n van vendre ${y}, quants televisors queden ara al magatzem?`, num: 50 - (y * 3), unitats: ["televisors", "televisor"] }; } },
-    { text: "Si un tren fa un trajecte en {x} hores i un cotxe triga la meitat, quantes hores triga el cotxe?", gen: () => { const x = _.randEven(4, 12); return { text: `Si un tren fa un trajecte en ${x} hores i un cotxe triga la meitat, quantes hores triga el cotxe?`, num: x / 2, unitats: ["hores", "hora", "h"] }; } },
-    { text: "Volem fer {x} paquets de caramels. A cada paquet hi posem 20 caramels. Quants caramels necessitarem en total?", gen: () => { const x = _.rand(3, 8); return { text: `Volem fer ${x} paquets de caramels. A cada paquet hi posem 20 caramels. Quants caramels necessitarem en total?`, num: x * 20, unitats: ["caramels", "caramel"] }; } },
-    { text: "En una llanterna gastem {x} piles cada mes. Quantes piles gastarem en un any sencer?", gen: () => { const x = _.rand(2, 4); return { text: `En una llanterna gastem ${x} piles cada mes. Quantes piles gastarem en un any sencer?`, num: x * 12, unitats: ["piles", "pila"] }; } },
-    { text: "Un formatger té {x} quilos de formatge. En ven una quarta part. Quants quilos de formatge li queden?", gen: () => { const num = _.rand(3, 8); const x = num * 4; return { text: `Un formatger té ${x} quilos de formatge. En ven una quarta part. Quants quilos de formatge li queden?`, num: x - num, unitats: ["quilos", "quilo", "kg", "quilograms"] }; } },
-    { text: "En una pineda hi ha {x} pins. Si un terç d'ells estan malalts, quants pins sans queden?", gen: () => { const num = _.rand(10, 20); const x = num * 3; return { text: `En una pineda hi ha ${x} pins. Si un terç d'ells estan malalts, quants pins sans queden?`, num: x - num, unitats: ["pins", "pin"] }; } },
-    { text: "Un camió transporta {x} caixes de llimones de 10 quilos cada una. Quants quilos de llimones porta en total?", gen: () => { const x = _.rand(15, 30); return { text: `Un camió transporta ${x} caixes de llimones de 10 quilos cada una. Quants quilos de llimones porta en total?`, num: x * 10, unitats: ["quilos", "quilo", "kg", "quilograms"] }; } },
-    { text: "Si la meitat d'una hora són 30 minuts, quants minuts seran tres quarts d'hora?", gen: () => { return { text: "Si la meitat d'una hora són 30 minuts, quants minuts seran tres quarts d'hora?", num: 45, unitats: ["minuts", "minut", "min"] }; } },
-    { text: "Tinc {x} bales i les vull repartir en 4 bosses iguals. Quantes bales hi haurà a cada bossa?", gen: () => { const num = _.rand(6, 12); const x = num * 4; return { text: `Tinc ${x} bales i les vull repartir en 4 bosses iguals. Quantes bales hi haurà a cada bossa?`, num: num, unitats: ["bales", "bala"] }; } },
-    { text: "En un niu d'abelles hi havia {x} abelles. Si en marxa una quinquena part, quantes abelles queden al niu?", gen: () => { const num = _.rand(10, 20); const x = num * 5; return { text: `En un niu d'abelles hi havia ${x} abelles. Si en marxa una cinquena part, quantes abelles queden al niu?`, num: x - num, unitats: ["abelles", "abella"] }; } },
-    { text: "Si una llibreta val {x} euros i una goma costa {y} cèntims, quants cèntims em costarà tot plegat?", gen: () => { const x = _.rand(2, 4); const y = _.rand(20, 60); return { text: `Si una llibreta val ${x} euros i una goma costa ${y} cèntims, quants cèntims em costarà tot plegat?`, num: (x * 100) + y, unitats: ["cèntims", "centims", "cèntim", "centim"] }; } },
-    { text: "Tinc 40 cromos de la meva col·lecció de {x} cromos. Quants cromos em falten per acabar-la?", gen: () => { const x = _.rand(80, 150); return { text: `Tinc 40 cromos de la meva col·lecció de ${x} cromos. Quants cromos em falten per acabar-la?`, num: x - 40, unitats: ["cromos", "cromo"] }; } }
-  ],
-  "5è": [
-    { text: "Si 4 bombons costen 2 euros, quants euros costaran {z} bombons?", gen: () => { const z = _.randEven(8, 16); return { text: `Si 4 bombons costen 2 euros, quants euros costaran ${z} bombons?`, num: z / 2, unitats: ["euros", "euro", "€"] }; } },
-    { text: "He comprat un llibre que valia {x} euros i m'han fet un descompte del 10%. Quants euros m'ha costat?", gen: () => { const x = _.randEven(20, 50); return { text: `He comprat un llibre que valia ${x} euros i m'han fet un descompte del 10%. Quants euros m'ha costat?`, num: x * 0.9, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc {x} pàgines per lIegir. Si ja n'he lIegit tres quartes parts, quantes pàgines em queden per lIegir?", gen: () => { const num = _.rand(20, 40); const x = num * 4; return { text: `Tinc ${x} pàgines per lIegir. Si ja n'he lIegit tres quartes parts, quantes pàgines em queden per lIegir?`, num: num, unitats: ["pàgines", "pagines", "pàgina", "pagina"] }; } },
-    { text: "Un ciclista fa una cursa de {x} quilòmetres. Si ja ha recorregut dues terceres parts del camí, quants quilòmetres ha recorregut?", gen: () => { const num = _.rand(15, 30); const x = num * 3; return { text: `Un ciclista fa una cursa de ${x} quilòmetres. Si ja ha recorregut dues terceres parts del camí, quants quilòmetres ha recorregut?`, num: num * 2, unitats: ["quilòmetres", "quilometres", "km"] }; } },
-    { text: "Si un quilogram de taronges costa 2 euros, quants euros costaran {y} quilos i mig?", gen: () => { const y = _.rand(3, 7); return { text: `Si un quilogram de taronges costa 2 euros, quants euros costaran ${y} quilos i mig?`, num: y * 2 + 1, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc un llibre de {x} pàgines. Avui n'he llegit la meitat i ahir una tercera part del total. Quantes pàgines em queden per llegir?", gen: () => { const num = _.rand(10, 30); const x = num * 6; return { text: `Tinc un llibre de ${x} pàgines. Avui n'he llegit la meitat i ahir una tercera part del total. Quantes pàgines em queden per llegir?`, num: x - (x/2 + x/3), unitats: ["pàgines", "pagines", "pàgina", "pagina"] }; } },
-    { text: "Si faig {x} viatges i a cada viatge porto {y} caixes de llet, quantes caixes de llet hauré portat en total?", gen: () => { const x = _.rand(4, 6); const y = _.rand(11, 15); return { text: `Si faig ${x} viatges i a cada viatge porto ${y} caixes de llet, quantes caixes de llet hauré portat en total?`, num: x * y, unitats: ["caixes", "caixa"] }; } },
-    { text: "Si un tren tarda {x} minuts a fer un recorregut, quants minuts trigarà a fer-lo dues vegades?", gen: () => { const x = _.rand(35, 55); return { text: `Si un tren tarda ${x} minuts a fer un recorregut, quants minuts trigarà a fer-lo dues vegades?`, num: x * 2, unitats: ["minuts", "minut", "min"] }; } },
-    { text: "En un calaix hi ha {x} dotzenes de mocadors. Si en trec {y}, quants mocadors queden al calaix?", gen: () => { const x = _.rand(3, 5); const y = _.rand(10, 18); return { text: `En un calaix hi ha ${x} dotzenes de mocadors. Si en trec ${y}, quants mocadors queden al calaix?`, num: (x * 12) - y, unitats: ["mocadors", "mocador"] }; } },
-    { text: "La quarta part d'una hora, quants minuts són?", gen: () => { return { text: "La quarta part d'una hora, quants minuts són?", num: 15, unitats: ["minuts", "minut", "min"] }; } },
-    { text: "Si un quilo de pomes costa 4 euros, quants euros costaran 3 quilos i tres quarts?", gen: () => { return { text: "Si un quilo de pomes costa 4 euros, quants euros costaran 3 quilos i tres quarts?", num: 15, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Un dipòsit conté {x} litres d'aigua. Si en gastem les tres cinquenes parts, quants litres ens queden?", gen: () => { const num = _.rand(10, 25); const x = num * 5; return { text: `Un dipòsit conté ${x} litres d'aigua. Si en gastem les tres cinquenes parts, quants litres ens queden?`, num: num * 2, unitats: ["litres", "litre", "l"] }; } },
-    { text: "Si un bitllet de tren costa {x} euros i té un recàrrec d'un 10% per festiu, quants euros costarà el bitllet en total?", gen: () => { const x = _.randEven(10, 40); return { text: `Si un bitllet de tren costa ${x} euros i té un recàrrec d'un 10% per festiu, quants euros costarà el bitllet en total?`, num: x * 1.1, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Si un corredor tarda 45 segons a fer una volta a la pista, quants segons trigarà a fer dues voltes?", gen: () => { return { text: "Si un corredor tarda 45 segons a fer una volta a la pista, quants segons trigarà a fer dues voltes?", num: 90, unitats: ["segons", "segon", "s"] }; } },
-    { text: "Un cotxe va a una velocitat constant de 90 quilòmetres per hora. Quants quilòmetres farà en 40 minuts?", gen: () => { return { text: "Un cotxe va a una velocitat constant de 90 quilòmetres per hora. Quants quilòmetres farà en 40 minuts?", num: 60, unitats: ["quilòmetres", "quilometres", "km"] }; } },
-    { text: "Tinc 8 ampolles d'oli de tres quarts de litre cada una. Quants litres d'oli tinc en total?", gen: () => { return { text: "Tinc 8 ampolles d'oli de tres quarts de litre cada una. Quants litres d'oli tinc en total?", num: 6, unitats: ["litres", "litre", "l"] }; } },
-    { text: "En una caixa hi ha 60 taronges. Si una tercera part estan seques i un 10% estan fetes malbé, quantes taronges bones queden?", gen: () => { return { text: "En una caixa hi ha 60 taronges. Si una tercera part estan seques i un 10% estan fetes malbé, quantes taronges bones queden?", num: 34, unitats: ["taronges", "taronja"] }; } },
-    { text: "Si mig quilo de formatge costa 6 euros, quants euros costarà un quilo i quart?", gen: () => { return { text: "Si mig quilo de formatge costa 6 euros, quants euros costarà un quilo i quart?", num: 15, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Tinc una fusta de {x} centímetres. Si en tallo les dues cinquenes parts, quants centímetres de fusta em queden?", gen: () => { const num = _.rand(20, 40); const x = num * 5; return { text: `Tinc una fusta de ${x} centímetres. Si en tallo les dues cinquenes parts, quants centímetres de fusta em queden?`, num: num * 3, unitats: ["centímetres", "centimetres", "cm"] }; } },
-    { text: "D'un camí de {x} quilòmetres, ja n'hem pavimentat un 40%. Quants quilòmetres queden per pavimentar?", gen: () => { const x = _.randEven(10, 40); return { text: `D'un camí de ${x} quilòmetres, ja n'hem pavimentat un 40%. Quants quilòmetres queden per pavimentar?`, num: x * 0.6, unitats: ["quilòmetres", "quilometres", "km"] }; } },
-    { text: "Si un rellotge s'avança 5 segons cada hora, quants minuts s'haurà avançat al cap d'un dia de 24 hores?", gen: () => { return { text: "Si un rellotge s'avança 5 segons cada hora, quants minuts s'haurà avançat al cap d'un dia de 24 hores?", num: 2, unitats: ["minuts", "minut", "min"] }; } },
-    { text: "En una granja el 20% de les {x} gallines són negres, i la resta són blanques. Quantes gallines blanques hi ha?", gen: () => { const num = _.rand(10, 20); const x = num * 5; return { text: `En una granja el 20% de les ${x} gallines són negres, i la resta són blanques. Quantes gallines blanques hi ha?`, num: x * 0.8, unitats: ["gallines", "gallina"] }; } },
-    { text: "Quants minuts són {x} hores i mitja?", gen: () => { const x = _.rand(2, 4); return { text: `Quants minuts són ${x} hores i mitja?`, num: (x * 60) + 30, unitats: ["minuts", "minut", "min"] }; } },
-    { text: "Tinc {x} euros i me'n gasto una quarta part en un regal. Quants euros em queden?", gen: () => { const num = _.rand(10, 25); const x = num * 4; return { text: `Tinc ${x} euros i me'n gasto una quarta part en un regal. Quants euros em queden?`, num: x - num, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Si un llibre val {x} euros i té una rebaixa del 25%, quants euros em costarà de menys?", gen: () => { const num = _.rand(4, 12); const x = num * 4; return { text: `Si un llibre val ${x} euros i té una rebaixa del 25%, quants euros em costarà de menys?`, num: num, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Un estany té {x} peixos de colors. Si en pesquem un terç i en tornem a tirar la meitat dels pescats, quants peixos queden a l'estany finalment?", gen: () => { const num = _.rand(6, 12); const x = num * 3; return { text: `Un estany té ${x} peixos de colors. Si en pesquem un terç i en tornem a tirar la meitat dels pescats, quants peixos queden a l'estany finalment?`, num: x - (num / 2), unitats: ["peixos", "peix"] }; } },
-    { text: "Si comprem un paquet de 4 llibretes que valen 4,80 euros en total, quants cèntims costa cada llibreta?", gen: () => { return { text: "Si comprem un paquet de 4 llibretes que valen 4,80 euros en total, quants cèntims costa cada llibreta?", num: 120, unitats: ["cèntims", "centims", "cèntim", "centim"] }; } },
-    { text: "Si una aixeta goteja 2 litres d'aigua cada dia, quants litres perdrà en la meitat d'un dia de 300 dies?", gen: () => { return { text: "Si una aixeta goteja 2 litres d'aigua cada dia, quants litres perdrà en la meitat d'un any de 300 dies?", num: 300, unitats: ["litres", "litre", "l"] }; } },
-    { text: "D'un pastís rectangular de xocolata, n'hem repartit les tres quartes parts. Quin percentatge de pastís ens queda per menjar?", gen: () => { return { text: "D'un pastís rectangular de xocolata, n'hem repartit les tres quartes parts. Quin percentatge de pastís ens queda per menjar?", num: 25, unitats: ["percentatge", "per cent", "%", "percent"] }; } },
-    { text: "Tinc {x} cromos de bàsquet. Si la meva germana en té un 50% més que jo, quants cromos té ella?", gen: () => { const x = _.randEven(20, 60); return { text: `Tinc ${x} cromos de bàsquet. Si la meva germana en té un 50% més que jo, quants cromos té ella?`, num: x * 1.5, unitats: ["cromos", "cromo"] }; } }
-  ],
-  "6è": [
-    { text: "Un cotxe consumeix {x} litres de benzina cada 100 quilòmetres. Quants litres de benzina consumirà en un viatge de {y} quilòmetres?", gen: () => { const x = _.rand(5, 8); const y = _.rand(3, 6) * 100; return { text: `Un cotxe consumeix ${x} litres de benzina cada 100 quilòmetres. Quants litres de benzina consumirà en un viatge de ${y} quilòmetres?`, num: x * (y / 100), unitats: ["litres", "litre", "l"] }; } },
-    { text: "Si tres llibretes costen {x} euros, quants euros costaran {y} llibretes?", gen: () => { const u = _.rand(2, 4); const x = u * 3; const y = _.rand(4, 7); return { text: `Si tres llibretes costen ${x} euros, quants euros costaran ${y} llibretes?`, num: u * y, unitats: ["euros", "euro", "€"] }; } },
-    { text: "En una caixa hi ha {x} pomes. Un 20% estan fetes malbé. Quantes pomes dolentes hi ha a la caixa?", gen: () => { const x = _.rand(2, 6) * 10; return { text: `En una caixa hi ha ${x} pomes. Un 20% estan fetes malbé. Quantes pomes dolentes hi ha a la caixa?`, num: x * 0.2, unitats: ["pomes", "poma"] }; } },
-    { text: "Un granger té {x} animals. El 25% són gallines. Quantes gallines té?", gen: () => { const x = _.rand(1, 4) * 40; return { text: `Un granger té ${x} animals. El 25% són gallines. Quantes gallines té?`, num: x * 0.25, unitats: ["gallines", "gallina"] }; } },
-    { text: "Tinc una ampolla de {x} litres d'aigua. Quants gots de 25 centilitres puc omplir?", gen: () => { const x = _.rand(2, 5); return { text: `Tinc una ampolla de ${x} litres d'aigua. Quants gots de 25 centilitres puc omplir?`, num: x * 4, unitats: ["gots", "got"] }; } },
-    { text: "Si corrent faig {x} quilòmetres en una hora, quants quilòmetres faré en 20 minuts?", gen: () => { const x = _.randEven(6, 15); return { text: `Si corrent faig ${x} quilòmetres en una hora, quants quilòmetres faré en 20 minuts?`, num: x / 3, unitats: ["quilòmetres", "quilometres", "km"] }; } },
-    { text: "Un paquet de 4 iogurts costa 1,20 euros. Quant costa un sol iogurt en cèntims d'euro?", gen: () => { return { text: "Un paquet de 4 iogurts costa 1,20 euros. Quant costa un sol iogurt en cèntims d'euro?", num: 30, unitats: ["cèntims", "centims", "cèntim", "centim"] }; } },
-    { text: "El meu pare fa passos de {x} centímetres. Si fa 100 passos, quants metres haurà caminat?", gen: () => { const x = _.rand(70, 85); return { text: `El meu pare fa passos de ${x} centímetres. Si fa 100 passos, quants metres haurà caminat?`, num: x, unitats: ["metres", "metre", "m"] }; } },
-    { text: "Si el perímetre d'un quadrat és de {x} centímetres, quants centímetres fa el seu costat?", gen: () => { const num = _.rand(5, 12); const x = num * 4; return { text: `Si el perímetre d'un quadrat és de ${x} centímetres, quants centímetres fa el seu costat?`, num: num, unitats: ["centímetres", "centimetres", "cm"] }; } },
-    { text: "En un mapa, 1 centímetre representa {x} quilòmetres reals. Si la distància al mapa és de {y} centímetres, quants quilòmetres reals hi ha?", gen: () => { const x = _.rand(4, 8); const y = _.rand(6, 10); return { text: `En un mapa, 1 centímetre representa ${x} quilòmetres reals. Si la distància al mapa és de ${y} centímetres, quants quilòmetres reals hi ha?`, num: x * y, unitats: ["quilòmetres", "quilometres", "km"] }; } },
-    { text: "Si compro un aparell de {x} euros i em fan el 20% de descompte, quants euros em costarà finalment?", gen: () => { const x = _.randEven(40, 90); return { text: `Si compro un aparell de ${x} euros i em fan el 20% de descompte, quants euros em costarà finalment?`, num: x * 0.8, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Una aixeta buida 4 litres d'aigua per minut. Quants litres d'aigua buidarà en una hora i mitja?", gen: () => { return { text: "Una aixeta buida 4 litres d'aigua per minut. Quants litres d'aigua buidarà en una hora i mitja?", num: 360, unitats: ["litres", "litre", "l"] }; } },
-    { text: "Un triangle equilàter té {x} centímetres de perímetre. Quants centímetres fa un dels seus costats?", gen: () => { const num = _.rand(8, 15); const x = num * 3; return { text: `Un triangle equilàter té ${x} centímetres de perímetre. Quants centímetres fa un dels seus costats?`, num: num, unitats: ["centímetres", "centimetres", "cm"] }; } },
-    { text: "He corregut 1500 metres al matí i la meva parella ha corregut 2,5 quilòmetres. Quants metres hem fet entre tots dos?", gen: () => { return { text: "He corregut 1500 metres al matí i la meva parella ha corregut 2,5 quilòmetres. Quants metres hem fet entre tots dos?", num: 4000, unitats: ["metres", "metre", "m"] }; } },
-    { text: "Si un bitllet de tren per a 4 persones costa {y} euros en total, quants euros costarà un bitllet per a una sola persona?", gen: () => { const num = _.rand(6, 12); const y = 4 * num; return { text: `Si un bitllet de tren per a 4 persones costa ${y} euros en total, quants euros costarà un bitllet per a una sola persona?`, num: num, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Quantes hores són les tres quartes parts d'un dia de 24 hores?", gen: () => { return { text: "Quantes hores són les tres quartes parts d'un dia de 24 hores?", num: 18, unitats: ["hores", "hora", "h"] }; } },
-    { text: "Si una ampolla de refresc d'1,5 litres es reparteix en gots de 15 centilitres, quants gots podrem omplir?", gen: () => { return { text: "Si una ampolla de refresc d'1,5 litres es reparteix en gots de 15 centilitres, quants gots podrem omplir?", num: 10, unitats: ["gots", "got"] }; } },
-    { text: "El preu d'una bicicleta de passeig és de {x} euros sense l'IVA. Si hi afegim un 10% d'impostos de recàrrec, quants euros costarà en total?", gen: () => { const x = _.randEven(120, 200); return { text: `El preu d'una bicicleta de passeig és de ${x} euros sense l'IVA. Si hi afegim un 10% d'impostos de recàrrec, quants euros costarà en total?`, num: x * 1.1, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Un ciclista va a una velocitat de 30 quilòmetres per hora. Quants minuts necessitarà per recórrer 15 quilòmetres?", gen: () => { return { text: "Un ciclista va a una velocitat de 30 quilòmetres per hora. Quants minuts necessitarà per recórrer 15 quilòmetres?", num: 30, unitats: ["minuts", "minut", "min"] }; } },
-    { text: "Una peça de roba de 4 metres de llargada s'encogeix un 5% en rentar-la. Quants centímetres s'haurà encongit?", gen: () => { return { text: "Una peça de roba de 4 metres de llargada s'encogeix un 5% en rentar-la. Quants centímetres s'haurà encongit?", num: 20, unitats: ["centímetres", "centimetres", "cm"] }; } },
-    { text: "En una competició de salts, el guanyador ha saltat 6 metres de llargada i el segon un 10% menys. Quants centímetres de diferència hi ha entre els dos?", gen: () => { return { text: "En una competició de salts, el guanyador ha saltat 6 metres de llargada i el segon un 10% menys. Quants centímetres de diferència hi ha entre els dos?", num: 60, unitats: ["centímetres", "centimetres", "cm"] }; } },
-    { text: "Tinc una rajola de xocolata de {x} grams. Si me'n menjo una cinquena part, quants grams de xocolata em queden?", gen: () => { const num = _.rand(30, 50); const x = num * 5; return { text: `Tinc una rajola de xocolata de ${x} grams. Si me'n menjo una cinquena part, quants grams de xocolata em queden?`, num: x - num, unitats: ["grams", "gram", "g"] }; } },
-    { text: "Si un formatger té {x} ampolles de llet de 2 litres cadascuna, quants gots de 25 centilitres podrà omplir amb tota la llet?", gen: () => { const x = _.rand(2, 5); return { text: `Si un formatger té ${x} ampolles de llet de 2 litres cadascuna, quants gots de 25 centilitres podrà omplir amb tota la llet?`, num: x * 8, unitats: ["gots", "got"] }; } },
-    { text: "Quants segons hi ha en {x} minuts i mig?", gen: () => { const x = _.rand(3, 6); return { text: `Quants segons hi ha en ${x} minuts i mig?`, num: (x * 60) + 30, unitats: ["segons", "segon", "s"] }; } },
-    { text: "Si comprem un objecte de {x} euros i paguem amb un bitllet de 100 euros, quants euros ens tornaran de canvi?", gen: () => { const x = _.rand(65, 89); return { text: `Si comprem un objecte de ${x} euros i paguem amb un bitllet de 100 euros, quants euros ens tornaran de canvi?`, num: 100 - x, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Un quadrat té una àrea de {x} centímetres quadrats. Quants centímetres fa el seu perímetre?", gen: () => { const costats = [4, 5, 6, 8, 10]; const c = costats[_.rand(0, costats.length - 1)]; return { text: `Un quadrat té una àrea de ${c * c} centímetres quadrats. Quants centímetres fa el seu perímetre?`, num: c * 4, unitats: ["centímetres", "centimetres", "cm"] }; } },
-    { text: "Una piscina té una capacitat de {x} litres. Si està plena en un 75%, quants litres d'aigua conté?", gen: () => { const num = _.rand(10, 30); const x = num * 400; return { text: `Una piscina té una capacitat de ${x} litres. Si està plena en un 75%, quants litres d'aigua conté?`, num: num * 300, unitats: ["litres", "litre", "l"] }; } },
-    { text: "Si una ampolla de suc de 1,5 litres costa 3 euros, quant costarà un lire del mateix suc?", gen: () => { return { text: "Si una ampolla de suc de 1,5 litres costa 3 euros, quant costarà un litre del mateix suc?", num: 2, unitats: ["euros", "euro", "€"] }; } },
-    { text: "Un avió vola a 800 quilòmetres per hora. Quants quilòmetres recorrerà en 45 minuts?", gen: () => { return { text: "Un avió vola a 800 quilòmetres per hora. Quants quilòmetres recorrerà en 45 minuts?", num: 600, unitats: ["quilòmetres", "quilometres", "km"] }; } },
-    { text: "El preu d'un llibre de lectura és de 16 euros. Si hi ha un descompte especial d'un 25%, quants euros em costarà en total?", gen: () => { return { text: "El preu d'un llibre de lectura és de 16 euros. Si hi ha un descompte especial d'un 25%, quants euros em costarà en total?", num: 12, unitats: ["euros", "euro", "€"] }; } }
-  ]
-};
-
-// Petites utilitats auxiliars per generar els nombres aleatoris de les plantilles de problemes
-const _ = {
-  rand: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
-  randEven: (min, max) => {
-    let num = Math.floor(Math.random() * (max - min + 1)) + min;
-    return num % 2 === 0 ? num : (num + 1 > max ? num - 1 : num + 1);
+// Base de dades inicial de problemes fidel als nivells i esperit del document "El Quinzet"
+const SERIES_DATA = {
+  1: {
+    nom: "Sèrie 1",
+    curs: "Educació Infantil / 1r de Primària",
+    descripció: "Iniciació. Sumes i restes de petits nombres fins al 5.",
+    problemes: [
+      { id: "1.1", text: "Tinc 2 boles blaves i 1 bola vermella. Quantes boles tinc en total?", numCorrect: 3, unitCorrect: "boles" },
+      { id: "1.2", text: "En un plat hi ha 3 galetes i en Joan en menja 1. Quantes galetes queden?", numCorrect: 2, unitCorrect: "galetes" },
+      { id: "1.3", text: "Tinc 1 globus i el pare em regala 2 més. Quants globus tinc ara?", numCorrect: 3, unitCorrect: "globus" },
+      { id: "1.4", text: "La Maria té 4 llapis i en perd 2. Quants llapis li queden?", numCorrect: 2, unitCorrect: "llapis" },
+      { id: "1.5", text: "Tinc 2 gats i la tieta me'n regala 2 més. Quants gats tinc?", numCorrect: 4, unitCorrect: "gats" }
+    ]
+  },
+  2: {
+    nom: "Sèrie 2",
+    curs: "1r de Primària",
+    descripció: "Sumes i restes senzilles de nombres fins al 10.",
+    problemes: [
+      { id: "2.1", text: "A la classe hi ha 5 nens i en venen 3 més. Quants nens hi ha ara?", numCorrect: 8, unitCorrect: "nens" },
+      { id: "2.2", text: "En un cistell hi ha 7 pomes. En mengem 3. Quantes pomes queden?", numCorrect: 4, unitCorrect: "pomes" },
+      { id: "2.3", text: "La Joana té 4 cromos i en guanya 4 més en un joc. Quants cromos té ara?", numCorrect: 8, unitCorrect: "cromos" },
+      { id: "2.4", text: "Tinc 10 caramels i en dono 5 a la meva germana. Quants caramels em queden?", numCorrect: 5, unitCorrect: "caramels" },
+      { id: "2.5", text: "Un cotxe té 4 rodes. Quantes rodes tenen 2 cotxes junts?", numCorrect: 8, unitCorrect: "rodes" }
+    ]
+  },
+  3: {
+    nom: "Sèrie 3",
+    curs: "1r i 2n de Primària",
+    descripció: "Dobles, sumes i restes de 3 dígits senzills, descomposició del 10.",
+    problemes: [
+      { id: "3.1", text: "Tinc 3 llibres a la prestatgeria. Quin és el doble de llibres?", numCorrect: 6, unitCorrect: "llibres" },
+      { id: "3.2", text: "En una llibreta hi ha 6 fulls blancs i 3 fulls quadrats. Quants fulls hi ha en total?", numCorrect: 9, unitCorrect: "fulls" },
+      { id: "3.3", text: "El meu germà té 8 anys i jo en tinc 2 menys. Quants anys tinc jo?", numCorrect: 6, unitCorrect: "anys" },
+      { id: "3.4", text: "Tinc 3 caixes amb 2 joguines a cada una. Quantes joguines tinc?", numCorrect: 6, unitCorrect: "joguines" },
+      { id: "3.5", text: "Si tinc 10 bales de vidre i en perdo 7, quantes bales em queden?", numCorrect: 3, unitCorrect: "bales" }
+    ]
+  },
+  4: {
+    nom: "Sèrie 4",
+    curs: "2n de Primària",
+    descripció: "Multiplicar per 2, dobles, meitats senzilles i diners.",
+    problemes: [
+      { id: "4.1", text: "Si repartim 10 galetes entre 2 nens a parts iguals, quantes galetes en corresponen a cadascun?", numCorrect: 5, unitCorrect: "galetes" },
+      { id: "4.2", text: "Un tricicle té 3 rodes. Quantes rodes tenen 3 tricicles?", numCorrect: 9, unitCorrect: "rodes" },
+      { id: "4.3", text: "Tinc 14 cromos i en perdo la meitat. Quants cromos em queden?", numCorrect: 7, unitCorrect: "cromos" },
+      { id: "4.4", text: "Dues setmanes de classe de 5 dies cadascuna, quants dies de classe són en total?", numCorrect: 10, unitCorrect: "dies" },
+      { id: "4.5", text: "He comprat un llapis per 10 cèntims i una goma per 5 cèntims. Quant m'he gastat en total?", numCorrect: 15, unitCorrect: "cèntims" }
+    ]
+  },
+  5: {
+    nom: "Sèrie 5",
+    curs: "2n i 3r de Primària",
+    descripció: "Operacions amb nombres fins al 30 i agrupacions.",
+    problemes: [
+      { id: "5.1", text: "Tinc 16 bombons i en reparteixo la meitat. Quants bombons em queden?", numCorrect: 8, unitCorrect: "bombons" },
+      { id: "5.2", text: "Un llibre té 20 pàgines. Si ja n'he llegit 12, quantes pàgines em queden per leer?", numCorrect: 8, unitCorrect: "pàgines" },
+      { id: "5.3", text: "En una capsa hi ha 12 llapis de colors i en una altra n'hi ha 8. Quants llapis hi ha en total?", numCorrect: 20, unitCorrect: "llapis" },
+      { id: "5.4", text: "Tinc 3 sobres de cromos amb 5 cromos cadascun. Quants cromos tinc en total?", numCorrect: 15, unitCorrect: "cromos" },
+      { id: "5.5", text: "Un caramel de maduixa costa 4 cèntims. Quant costaran 5 caramels iguals?", numCorrect: 20, unitCorrect: "cèntims" }
+    ]
+  },
+  6: {
+    nom: "Sèrie 6",
+    curs: "3r de Primària",
+    descripció: "Taules del 2, 3, 4, 5 i 10. Canvi de monedes bàsic.",
+    problemes: [
+      { id: "6.1", text: "Tinc un bitllet de 20 euros i compro un llibre que en costa 12. Quants euros em tornaran?", numCorrect: 8, unitCorrect: "euros" },
+      { id: "6.2", text: "Quants dies de feina són 4 setmanes si treballem 5 dies a cada setmana?", numCorrect: 20, unitCorrect: "dies" },
+      { id: "6.3", text: "Si cada dia em menjo 2 iogurts de maduixa, quants iogurts em menjaré en una setmana sencera de 7 dies?", numCorrect: 14, unitCorrect: "iogurts" },
+      { id: "6.4", text: "En una bossa hi ha 18 caramels i la meitat són de menta. Quants caramels de menta hi ha?", numCorrect: 9, unitCorrect: "caramels" },
+      { id: "6.5", text: "Compro 3 xiclets a 6 cèntims cadascun. Quants cèntims costen en total?", numCorrect: 18, unitCorrect: "cèntims" }
+    ]
+  },
+  7: {
+    nom: "Sèrie 7",
+    curs: "3r i 4t de Primària",
+    descripció: "Diferències comparatives, hores i fraccions bàsiques.",
+    problemes: [
+      { id: "7.1", text: "En un bosc hi ha 25 pins i 15 alzines. Quants pins hi ha més que alzines?", numCorrect: 10, unitCorrect: "pins" },
+      { id: "7.2", text: "Tinc 15 euros i gasto la tercera part en un regal. Quants euros faré servir?", numCorrect: 5, unitCorrect: "euros" },
+      { id: "7.3", text: "Una hora sencera té 60 minuts. Quants minuts té mitja hora?", numCorrect: 30, unitCorrect: "minuts" },
+      { id: "7.4", text: "Si tinc 18 cromos i els vull repartir a parts iguals entre 3 amics, quants cromos tocaran a cadascun?", numCorrect: 6, unitCorrect: "cromos" },
+      { id: "7.5", text: "A classe som 22 alumnes en total. Si avui n'han faltat 4, quants som a classe avui?", numCorrect: 18, unitCorrect: "alumnes" }
+    ]
+  },
+  8: {
+    nom: "Sèrie 8",
+    curs: "4t de Primària",
+    descripció: "Quarts d'hora, nombres de dues xifres, fraccions de cordes i bitllets de 50.",
+    problemes: [
+      { id: "8.1", text: "D'una corda de 40 metres en tallo la quarta part. Quants metres de corda faré servir?", numCorrect: 10, unitCorrect: "metres" },
+      { id: "8.2", text: "Compro un joc de taula de 35 euros i pago amb un bitllet de 50 euros. Quants euros em tornaran?", numCorrect: 15, unitCorrect: "euros" },
+      { id: "8.3", text: "Quants quarts d'hora hi ha en dues hores senceres?", numCorrect: 8, unitCorrect: "quarts" },
+      { id: "8.4", text: "Tinc 24 llapis de colors i els poso en caixes de 6 llapis cadascuna. Quantes caixes necessito?", numCorrect: 4, unitCorrect: "caixes" },
+      { id: "8.5", text: "Quants mesos són 3 anys complets?", numCorrect: 36, unitCorrect: "mesos" }
+    ]
+  },
+  9: {
+    nom: "Sèrie 9",
+    curs: "4t i 5è de Primària",
+    descripció: "Dobles i triples combinats, fraccions de metre i minuts.",
+    problemes: [
+      { id: "9.1", text: "La meva àvia m'ha donat 25 euros i la meva mare el triple que l'àvia. Quant m'han donat entre totes dues?", numCorrect: 100, unitCorrect: "euros" },
+      { id: "9.2", text: "Hem quedat de trobar-nos a les 9 hores i 11 minuts. Hem quedat de trobar-nos mitja hora abans. A quina hora ens trobarem?", numCorrect: "8 hores i 41 minuts", unitCorrect: "hores" },
+      { id: "9.3", text: "En Jael té 25 croquetes. 8 nois li donen 2 croquetes cadascun. Quantes en té, ara?", numCorrect: 41, unitCorrect: "croquetes" },
+      { id: "9.4", text: "Quants trossos de metre i mig puc fer amb una cinta de 15 metres?", numCorrect: 10, unitCorrect: "trossos" },
+      { id: "9.5", text: "Tinc 3 bosses de boles. A cada bossa hi ha 10 boles vermelles i 5 boles blaves. Quantes boles tinc en total?", numCorrect: 45, unitCorrect: "boles" }
+    ]
+  },
+  10: {
+    nom: "Sèrie 10",
+    curs: "5è de Primària",
+    descripció: "Operacions amb decimals, percentatges bàsics i volums.",
+    problemes: [
+      { id: "10.1", text: "Un paquet de xiclets costa 1,20 euros. Si pago amb una moneda de 2 euros, quants cèntims em tornaran?", numCorrect: 80, unitCorrect: "cèntims" },
+      { id: "10.2", text: "El 25% dels 40 alumnes de cinquè porten ulleres. Quants alumnes porten ulleres?", numCorrect: 10, unitCorrect: "alumnes" },
+      { id: "10.3", text: "Tinc 3 llimonades de mig litre cada una. Quants litres de llimonada tinc en total?", numCorrect: 1.5, unitCorrect: "litres" },
+      { id: "10.4", text: "Si 4 llibres iguals costen 48 euros, quants euros costa un sol llibre?", numCorrect: 12, unitCorrect: "euros" },
+      { id: "10.5", text: "D'un camí de 100 quilòmetres, ja n'hem recorregut la cinquena part. Quants quilòmetres ens queden per recórrer?", numCorrect: 80, unitCorrect: "quilòmetres" }
+    ]
+  },
+  11: {
+    nom: "Sèrie 11",
+    curs: "5è i 6è de Primària",
+    descripció: "Fraccions de repartiment i operacions horàries avançades.",
+    problemes: [
+      { id: "11.1", text: "Vull repartir 3 taronges entre 4 amics. Quina fracció de taronja rebrà cadascun?", numCorrect: "3/4", unitCorrect: "de taronja" },
+      { id: "11.2", text: "Un tren triga 1 hora i 45 minuts a fer un recorregut. Si surt a les 10 en punt del matí, a quina hora arribarà?", numCorrect: 11, unitCorrect: "hores i 45 minuts" },
+      { id: "11.3", text: "Tinc 12 ampolles d'aigua de quart de litre cadascuna. Quants litres d'aigua tinc en total?", numCorrect: 3, unitCorrect: "litres" },
+      { id: "11.4", text: "El preu d'una samarreta és de 30 euros, però avui ens fan un descompte del 10%. Quants euros ens costarà la samarreta?", numCorrect: 27, unitCorrect: "euros" },
+      { id: "11.5", text: "Cinc amics van a collir pomes i en troben 45 de bones. Quantes pomes se'n pot quedar cadascun?", numCorrect: 9, unitCorrect: "pomes" }
+    ]
+  },
+  12: {
+    nom: "Sèrie 12",
+    curs: "6è de Primària",
+    descripció: "Velocitat, herències, escales i equivalències complexes.",
+    problemes: [
+      { id: "12.1", text: "Un ciclista va a una velocitat constant de 24 quilòmetres per hora. Quants quilòmetres farà en 15 minuts?", numCorrect: 6, unitCorrect: "quilòmetres" },
+      { id: "12.2", text: "Quantes ampolles de mig litre es poden omplir amb un dipòsit de 15 litres d'aigua?", numCorrect: 30, unitCorrect: "ampolles" },
+      { id: "12.3", text: "Reparteix 12 croquetes entre 16 persones. Quina part de croqueta rebrà cadascuna?", numCorrect: "3/4", unitCorrect: "de croqueta" },
+      { id: "12.4", text: "La tercera part d'una herència és de 5.000 euros. Quin és el valor total de l'herència en euros?", numCorrect: 15000, unitCorrect: "euros" },
+      { id: "12.5", text: "Si un paquet de formatge de 200 grams costa 3 euros, quants euros costarà un quilogram complet d'aquest formatge?", numCorrect: 15, unitCorrect: "euros" }
+    ]
+  },
+  13: {
+    nom: "Sèrie 13",
+    curs: "6è de Primària - Cicle Superior",
+    descripció: "Problemes directes de la darrera sèrie del document (p. ex., secció 13.49).",
+    problemes: [
+      { id: "13.1", text: "Reparteix 15 croquetes entre 20 persones. Quant tocarà a cadascuna?", numCorrect: "3/4", unitCorrect: "parts de croqueta" },
+      { id: "13.2", text: "Set amics van a buscar bolets i en troben 49. Quants se'n poden quedar cada un?", numCorrect: 7, unitCorrect: "bolets" },
+      { id: "13.3", text: "Set setmanes de feina de 5 dies cada una, quants dies són?", numCorrect: 35, unitCorrect: "dies" },
+      { id: "13.4", text: "En un bosc hi ha 61 pins i 43 eucaliptus. Quants pins hi ha més que eucaliptus?", numCorrect: 18, unitCorrect: "pins" },
+      { id: "13.5", text: "En Gaspar va comprar 18 metres de corda per a l'estenedor. Al final només en necessita la tercera part. Quants metres farà servir?", numCorrect: 6, unitCorrect: "metres" }
+    ]
   }
 };
 
 export default function App() {
-  // Navigation & Settings State
-  const [vista, setVista] = useState('benvinguda'); // 'benvinguda', 'joc', 'resultats', 'configurador'
-  const [curs, setCurs] = useState('1r');
-  const [bancPlantilles, setBancPlantilles] = useState(PROBLEMES_PLANTILLES);
+  const [selectedSerie, setSelectedSerie] = useState(1);
+  const [activeMode, setActiveMode] = useState('training'); // 'training' o 'official'
+  const [gameState, setGameState] = useState('menu'); // 'menu', 'playing', 'finished'
+  const [problems, setProblems] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [userAnswersHistory, setUserAnswersHistory] = useState([]);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
   
-  // Game Setup
-  const [problemesActuals, setProblemesActuals] = useState([]);
-  const [indexPregunta, setIndexPregunta] = useState(0);
-  const [respostaUsuari, setRespostaUsuari] = useState('');
-  const [reproduccionsRestants, setReproduccionsRestants] = useState(2);
-  const [respostesGuardades, setRespostesGuardades] = useState([]); // {pregunta, respostaEscrita, esCorrecte, motiuError}
+  // Opcions de so i velocitat
+  const [speechRate, setSpeechRate] = useState(0.85);
+  const [hideTextActive, setHideTextActive] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(0); // Màxim 1 repetició en mode oficial
   
-  // Settings
-  const [veuVelocitat, setVeuVelocitat] = useState(0.85);
-  const [mostrarTextAccessible, setMostrarTextAccessible] = useState(false);
-  const [veuSintesiSuportada, setVeuSintesiSuportada] = useState(true);
+  const [validationMessage, setValidationMessage] = useState(null);
+  const [inputPlaceholder, setInputPlaceholder] = useState('');
 
-  // Custom problem creation
-  const [nouProblemText, setNouProblemText] = useState('');
-  const [nouProblemNum, setNouProblemNum] = useState('');
-  const [nouProblemUnitats, setNouProblemUnitats] = useState('');
-  const [errorConfig, setErrorConfig] = useState('');
-
-  // Audio & speech setup
-  useEffect(() => {
-    if (!('speechSynthesis' in window)) {
-      setVeuSintesiSuportada(false);
-    }
-  }, []);
-
-  // Seleccionar, avaluar aleatòriament i barrejar problemes quan es tria un curs
-  const iniciarSessio = (cursSeleccionat) => {
-    setCurs(cursSeleccionat);
-    const plantillesDisponibles = bancPlantilles[cursSeleccionat] || [];
-    
-    // Barrejar de manera aleatòria i triar 10 problemes per a fer una sessió ràpida
-    const barrejades = [...plantillesDisponibles].sort(() => 0.5 - Math.random()).slice(0, 10);
-    
-    // Avaluar dinàmicament cadascuna de les plantilles per generar números canviants
-    const instanciesProblemes = barrejades.map(plantilla => {
-      if (typeof plantilla.gen === 'function') {
-        try {
-          return { id: plantilla.id || `dyn-${Date.now()}-${Math.random()}`, ...plantilla.gen() };
-        } catch (e) {
-          // Fallback en cas d'error
-          return { id: "err", text: plantilla.text, num: 0, unitats: ["elements"] };
-        }
+  // Sintetitzador de so integrat amb Web Audio API
+  const playSound = (type) => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      if (type === 'success') {
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } else if (type === 'error') {
+        osc.frequency.setValueAtTime(220, ctx.currentTime);
+        osc.frequency.setValueAtTime(147, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      } else if (type === 'warning') {
+        osc.frequency.setValueAtTime(330, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      } else if (type === 'fanfare') {
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, idx) => {
+          const noteOsc = ctx.createOscillator();
+          const noteGain = ctx.createGain();
+          noteOsc.connect(noteGain);
+          noteGain.connect(ctx.destination);
+          noteOsc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.1);
+          noteGain.gain.setValueAtTime(0.08, ctx.currentTime + idx * 0.1);
+          noteGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 0.4);
+          noteOsc.start(ctx.currentTime + idx * 0.1);
+          noteOsc.stop(ctx.currentTime + idx * 0.1 + 0.45);
+        });
       }
-      return plantilla; // Per problemes manuals sense generador
-    });
+    } catch (e) {
+      console.log("Audio API no suportada en aquest navegador.");
+    }
+  };
+
+  // Text-To-Speech (Lectura en Català)
+  const speakQuestion = (text, forceSpeak = false) => {
+    if (!forceSpeak && activeMode === 'training' && !hideTextActive) return;
     
-    setProblemesActuals(instanciesProblemes);
-    setIndexPregunta(0);
-    setRespostaUsuari('');
-    setReproduccionsRestants(2);
-    setRespostesGuardades([]);
-    setVista('joc');
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ca-ES';
+      utterance.rate = speechRate;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const startSeries = (serieId) => {
+    const selected = [...SERIES_DATA[serieId].problemes];
+    setProblems(selected);
+    setSelectedSerie(serieId);
+    setGameState('playing');
+    setCurrentIndex(0);
+    setUserAnswer('');
+    setUserAnswersHistory([]);
+    setScore(0);
+    setRepeatCount(0);
+    setValidationMessage(null);
     
-    // Auto-reproduir el primer problema
+    setInputPlaceholder(`Exemple: ${selected[0].numCorrect} ${selected[0].unitCorrect}`);
+
     setTimeout(() => {
-      llegirEnunciat(instanciesProblemes[0]?.text);
-    }, 800);
+      speakQuestion(selected[0].text, true);
+    }, 300);
   };
 
-  // Funció Text-to-Speech adaptada al Català
-  const llegirEnunciat = (text) => {
-    if (!('speechSynthesis' in window)) return;
-    
-    // Cancel·lar qualsevol lectura activa
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ca-ES'; // Català
-    utterance.rate = veuVelocitat;
-    
-    // Intentar carregar i fixar una veu nativa en català
-    const veus = window.speechSynthesis.getVoices();
-    const veuCat = veus.find(v => v.lang.startsWith('ca'));
-    if (veuCat) {
-      utterance.voice = veuCat;
-    }
-    
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const handlesEscoltar = () => {
-    if (reproduccionsRestants > 0) {
-      llegirEnunciat(problemesActuals[indexPregunta]?.text);
-      setReproduccionsRestants(prev => prev - 1);
-    }
-  };
-
-  // Funció de validació intel·ligent del Quinzet
-  const validarResposta = (respostaEscrita, respostaCorrecta) => {
-    const textNet = respostaEscrita.trim().toLowerCase();
-    
-    if (!textNet) {
-      return { esCorrecte: false, motiu: "Camp de resposta buit." };
-    }
-
-    // Buscar el número dins del text
-    const regexNumero = /[-+]?[0-9]*[.,]?[0-9]+/g;
-    const numerosTrobats = textNet.match(regexNumero);
-
-    if (!numerosTrobats) {
-      return { esCorrecte: false, motiu: "No s'ha detectat cap número en la teva resposta." };
-    }
-
-    // Agafem el primer número extret de la resposta escrita de l'alumne
-    const numeroNetText = numerosTrobats[0].replace(',', '.');
-    const numeroAlumne = parseFloat(numeroNetText);
-    const numeroEsperat = respostaCorrecta.num;
-
-    // Comprovar si el valor numèric és correcte
-    if (Math.abs(numeroAlumne - numeroEsperat) > 0.01) {
-      return { esCorrecte: false, motiu: "El valor del número no és correcte." };
-    }
-
-    // Eliminar el número de la resposta per analitzar la unitat
-    const textSenseNumero = textNet.replace(numerosTrobats[0], '').trim();
-
-    if (!textSenseNumero) {
-      return { 
-        esCorrecte: false, 
-        motiu: "Has oblidat la unitat! Recorda que a El Quinzet oblidar la unitat (ex: 'caramels', 'hores', 'm') invalida la resposta sencera." 
-      };
-    }
-
-    // Comprovar si el text restant conté alguna de les unitats acceptades
-    const unitatValida = respostaCorrecta.unitats.some(unitat => {
-      // Netegem accents i dièresis dels texts per a ser més flexibles
-      const cleanString = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      const uNetejada = cleanString(unitat);
-      const alumneNetejada = cleanString(textSenseNumero);
+  const handleNextQuestion = () => {
+    if (currentIndex + 1 < problems.length) {
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
+      setUserAnswer('');
+      setValidationMessage(null);
+      setRepeatCount(0);
+      setInputPlaceholder(`Exemple: ${problems[nextIdx].numCorrect} ${problems[nextIdx].unitCorrect}`);
       
-      // Control d'unitats de tipus abreviacions com "m", "km", "%", "€"
-      if (uNetejada === "€" || uNetejada === "%" || uNetejada === "m" || uNetejada === "km" || uNetejada === "cm") {
-        return alumneNetejada.includes(uNetejada);
-      }
-
-      return alumneNetejada.includes(uNetejada) || uNetejada.includes(alumneNetejada);
-    });
-
-    if (!unitatValida) {
-      return { 
-        esCorrecte: false, 
-        motiu: `Unitat incorrecta. S'esperava acompanyar el nombre amb la unitat correcta de la pregunta (p. ex: "${respostaCorrecta.unitats[0]}").` 
-      };
-    }
-
-    return { esCorrecte: true, motiu: "Molt bé!" };
-  };
-
-  const handleSeguent = () => {
-    const problema = problemesActuals[indexPregunta];
-    const resultatValidacio = validarResposta(respostaUsuari, problema);
-
-    const novaResposta = {
-      pregunta: problema.text,
-      respostaEscrita: respostaUsuari,
-      esCorrecte: resultatValidacio.esCorrecte,
-      motiuError: resultatValidacio.motiu,
-      solucioCorrecta: `${problema.num} ${problema.unitats[0]}`
-    };
-
-    const novesRespostes = [...respostesGuardades, novaResposta];
-    setRespostesGuardades(novesRespostes);
-
-    // Avançar de pregunta o acabar
-    if (indexPregunta < problemesActuals.length - 1) {
-      setIndexPregunta(prev => prev + 1);
-      setRespostaUsuari('');
-      setReproduccionsRestants(2);
-      
-      // Auto-reproduir següent pregunta
       setTimeout(() => {
-        llegirEnunciat(problemesActuals[indexPregunta + 1]?.text);
-      }, 600);
+        speakQuestion(problems[nextIdx].text, true);
+      }, 300);
     } else {
-      setVista('resultats');
+      setGameState('finished');
+      playSound('fanfare');
+      
+      // Emmagatzematge d'històric local
+      const savedHistory = JSON.parse(localStorage.getItem('quinzet_history') || '[]');
+      const newHistoryItem = {
+        data: new Date().toLocaleDateString('ca-ES'),
+        serie: SERIES_DATA[selectedSerie].nom,
+        nivell: SERIES_DATA[selectedSerie].curs,
+        mode: activeMode === 'training' ? 'Entrenament' : 'Oficial',
+        encerts: score,
+        total: problems.length
+      };
+      localStorage.setItem('quinzet_history', JSON.stringify([newHistoryItem, ...savedHistory].slice(0, 10)));
     }
   };
 
-  // Afegir un problema personalitzat de manera manual
-  const handleAfegirProblema = (e) => {
+  const checkAnswer = (e) => {
     e.preventDefault();
-    if (!nouProblemText || !nouProblemNum || !nouProblemUnitats) {
-      setErrorConfig("Tots els camps són obligatoris per poder-lo desar.");
+    if (!userAnswer.trim()) return;
+
+    const currentProb = problems[currentIndex];
+    const correctNum = String(currentProb.numCorrect).toLowerCase().trim();
+    const correctUnit = String(currentProb.unitCorrect).toLowerCase().trim();
+    const cleanUserAnswer = userAnswer.toLowerCase().trim();
+
+    // Regex per trobar el valor numèric, decimals o fraccions
+    const numberRegex = /(\d+[\/\.,]\d+|\d+)/g;
+    const userNumbers = cleanUserAnswer.match(numberRegex);
+    const userWords = cleanUserAnswer.replace(numberRegex, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").trim();
+
+    // 1. Validació de si ha escrit cap número
+    if (!userNumbers) {
+      playSound('error');
+      setValidationMessage({
+        type: 'error',
+        text: "Ui! Sembla que no has escrit cap nombre o fracció."
+      });
       return;
     }
 
-    const unitatsArray = nouProblemUnitats.split(',').map(u => u.trim().toLowerCase());
-    const nouProblema = {
-      id: `custom-${Date.now()}`,
-      text: nouProblemText,
-      gen: () => ({
-        text: nouProblemText,
-        num: parseFloat(nouProblemNum),
-        unitats: unitatsArray
-      }),
-      // Guardar referències clares
-      num: parseFloat(nouProblemNum),
-      unitats: unitatsArray
-    };
+    const userNum = userNumbers[0].replace(',', '.');
+    const standardCorrectNum = correctNum.replace(',', '.');
 
-    setBancPlantilles(prev => ({
-      ...prev,
-      [curs]: [...prev[curs], nouProblema]
-    }));
+    // 2. Validació de si el número és erroni
+    if (userNum !== standardCorrectNum) {
+      playSound('error');
+      
+      setUserAnswersHistory([...userAnswersHistory, {
+        question: currentProb.text,
+        user: userAnswer,
+        correct: `${currentProb.numCorrect} ${currentProb.unitCorrect}`,
+        isCorrect: false
+      }]);
 
-    setNouProblemText('');
-    setNouProblemNum('');
-    setNouProblemUnitats('');
-    setErrorConfig('');
+      setValidationMessage({
+        type: 'error',
+        text: `Incorrecte. La resposta correcta era: ${currentProb.numCorrect} ${currentProb.unitCorrect}.`
+      });
+      
+      setStreak(0);
+      
+      if (activeMode === 'official') {
+        setTimeout(() => handleNextQuestion(), 3000);
+      }
+      return;
+    }
+
+    // 3. Validació de la unitat (Regla estricta d'El Quinzet)
+    const correctUnitKeywords = correctUnit.split(' ').filter(w => w.length > 2);
+    const userWordsClean = userWords.split(' ');
+
+    let unitMatches = false;
+    if (correctUnitKeywords.length === 0) {
+      unitMatches = cleanUserAnswer.includes(correctUnit);
+    } else {
+      unitMatches = correctUnitKeywords.some(keyword => {
+        const singularKey = keyword.slice(0, -1);
+        return userWordsClean.some(userWord => 
+          userWord.includes(singularKey) || userWord.includes(keyword)
+        );
+      });
+    }
+
+    // Si es descuida de posar la unitat
+    if (userWords.trim() === '') {
+      playSound('warning');
+      setValidationMessage({
+        type: 'warning',
+        text: "Alerta! Has encertat el nombre, però has oblidat la unitat! Recorda que a El Quinzet l'oblit de la unitat invalida l'exercici. Intenta-ho de nou afegint la unitat (p.ex. 'bolets', 'euros')."
+      });
+      return;
+    }
+
+    // Si posa una unitat completament incorrecta
+    if (!unitMatches) {
+      playSound('warning');
+      setValidationMessage({
+        type: 'warning',
+        text: `La unitat no sembla correcta. Estàs segur que són ${userWords}? Comprova bé de què parla el problema.`
+      });
+      return;
+    }
+
+    // 4. Tot és correcte
+    playSound('success');
+    setScore(score + 1);
+    setStreak(streak + 1);
+    
+    setUserAnswersHistory([...userAnswersHistory, {
+      question: currentProb.text,
+      user: userAnswer,
+      correct: `${currentProb.numCorrect} ${currentProb.unitCorrect}`,
+      isCorrect: true
+    }]);
+
+    setValidationMessage({
+      type: 'success',
+      text: "Excel·lent! Resposta correcta amb la seva unitat!"
+    });
+
+    if (activeMode === 'official') {
+      setTimeout(() => handleNextQuestion(), 1500);
+    }
   };
 
-  const eliminarProblema = (index) => {
-    setBancPlantilles(prev => ({
-      ...prev,
-      [curs]: prev[curs].filter((_, i) => i !== index)
-    }));
+  const handleRepeatVoice = () => {
+    if (repeatCount < 1 || activeMode === 'training') {
+      speakQuestion(problems[currentIndex].text, true);
+      if (activeMode === 'official') {
+        setRepeatCount(repeatCount + 1);
+      }
+    }
   };
-
-  // Recompte de respostes encertades
-  const encertsTotals = respostesGuardades.filter(r => r.esCorrecte).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-      {/* HEADER */}
-      <header className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setVista('benvinguda')}>
-            <div className="p-2.5 bg-white/10 rounded-xl">
-              <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse" />
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-sky-100 text-gray-800 font-sans pb-12">
+      
+      {/* Header de l'aplicació */}
+      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 transition-all">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-tr from-indigo-600 to-sky-500 p-2.5 rounded-2xl text-white shadow-md shadow-indigo-100">
+              <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">El Quinzet</h1>
-              <p className="text-xs text-emerald-100">Càlcul Mental Dinàmic i Progressiu</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-700 to-sky-600 bg-clip-text text-transparent">
+                El Quinzet: Càlcul Mental
+              </h1>
+              <p className="text-xs text-gray-500 font-medium">
+                Sèries oficials de problemes de primària
+              </p>
             </div>
           </div>
-          
-          <nav className="flex space-x-2">
-            <button 
+
+          {/* Mode de joc */}
+          <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl border border-gray-200">
+            <button
               onClick={() => {
-                window.speechSynthesis.cancel();
-                setVista('benvinguda');
+                setActiveMode('training');
+                setHideTextActive(false);
               }}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${vista === 'benvinguda' ? 'bg-white text-teal-800 shadow-sm' : 'hover:bg-white/10'}`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeMode === 'training'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'
+              }`}
             >
-              Inici
+              Mode Entrenament
             </button>
-            <button 
+            <button
               onClick={() => {
-                window.speechSynthesis.cancel();
-                setVista('configurador');
+                setActiveMode('official');
+                setHideTextActive(true);
               }}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${vista === 'configurador' ? 'bg-white text-teal-800 shadow-sm' : 'hover:bg-white/10'}`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeMode === 'official'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'
+              }`}
             >
-              <Settings className="h-4 w-4" />
-              Panell Docent
+              Mode Oficial El Quinzet
             </button>
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
+      {/* Contingut principal */}
+      <main className="max-w-6xl mx-auto px-4 mt-8">
         
-        {/* VISTA 1: BENVINGUDA */}
-        {vista === 'benvinguda' && (
-          <div className="space-y-8 animate-fadeIn">
-            {/* Targeta d'introducció */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100 text-center space-y-4">
-              <div className="inline-flex p-4 bg-teal-50 rounded-full text-teal-600 mb-2">
-                <BookOpen className="h-10 w-10" />
+        {/* VIEW: Menu Principal / Selectors */}
+        {gameState === 'menu' && (
+          <div className="space-y-8">
+            {/* Banner Introductori de la metodologia */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 transform translate-x-12 -translate-y-12 opacity-10 pointer-events-none">
+                <Award className="w-96 h-96" />
               </div>
-              <h2 className="text-3xl font-extrabold text-slate-900">Entrena el teu Càlcul Mental</h2>
-              <p className="text-slate-600 max-w-xl mx-auto text-base sm:text-lg">
-                Practica amb problemes d'<strong>El Quinzet</strong> generats de manera canviant. Cada vegada que comences una sessió, les dades numèriques dels problemes es recalculen perquè puguis practicar tantes vegades com vulguis sense repetir!
-              </p>
-              
-              <div className="pt-4 flex flex-wrap justify-center gap-3 text-xs text-slate-500">
-                <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-full">
-                  <Volume2 className="h-4 w-4 text-teal-600" /> 180 Plantilles de problemes
+              <div className="relative z-10 max-w-2xl space-y-4">
+                <span className="bg-white/20 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
+                  Mètode Oficial Adaptat
                 </span>
-                <span className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-full font-bold">
-                  <Sparkles className="h-4 w-4 text-emerald-600 animate-spin" /> Enunciats Dinàmics (No repetibles!)
-                </span>
-                <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-full">
-                  <UserCheck className="h-4 w-4 text-teal-600" /> Correcció automàtica d'unitats
-                </span>
-              </div>
-            </div>
-
-            {/* Normes de la Prova */}
-            <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200/60 space-y-3">
-              <h3 className="font-bold text-amber-900 flex items-center gap-2">
-                <Info className="h-5 w-5 text-amber-700 flex-shrink-0" />
-                Normes d'El Quinzet
-              </h3>
-              <ul className="text-sm text-amber-800 space-y-2 list-disc list-inside">
-                <li>L'enunciat es presenta de manera **oral**. Pots escoltar-lo un màxim de **2 vegades** demanant-ho al botó de so.</li>
-                <li>**No es pot fer cap operació escrita**. La resolució ha de ser totalment mental.</li>
-                <li>**És obligatori acompanyar el número amb la unitat** (ex: \"8 caramels\", \"20 cèntims\"). L'oblit o l'error en la unitat marcarà l'exercici com a incorrecte.</li>
-              </ul>
-            </div>
-
-            {/* Selecció de Curs */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 text-center">Selecciona un nivell per iniciar la prova de 10 problemes:</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {Object.keys(bancPlantilles).map((nomCurs) => (
-                  <button
-                    key={nomCurs}
-                    onClick={() => iniciarSessio(nomCurs)}
-                    className="group bg-white hover:bg-teal-50 border-2 border-slate-200 hover:border-teal-500 p-5 rounded-2xl text-center shadow-sm transition-all duration-200 flex flex-col items-center justify-center space-y-2 hover:-translate-y-1"
-                  >
-                    <span className="text-3xl font-black text-teal-600 group-hover:scale-110 transition-transform">
-                      {nomCurs}
-                    </span>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                      {nomCurs === '1r' || nomCurs === '2n' ? 'Cicle Inicial' : nomCurs === '3r' || nomCurs === '4t' ? 'Cicle Mitjà' : 'Cicle Superior'}
-                    </span>
-                    <span className="text-xs text-slate-400 font-medium">
-                      {bancPlantilles[nomCurs].length} preguntes de base
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Ajustos d'accessibilitat ràpida */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap gap-6 items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Settings className="h-5 w-5 text-slate-400" />
-                <span className="text-sm font-medium text-slate-700">Ajustos de veu i accessibilitat:</span>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-4">
-                {/* Velocitat de la veu */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-slate-500">Velocitat de lectura:</span>
-                  <select 
-                    value={veuVelocitat} 
-                    onChange={(e) => setVeuVelocitat(parseFloat(e.target.value))}
-                    className="bg-slate-100 border-none rounded-lg p-1 text-xs font-semibold focus:ring-2 focus:ring-teal-500"
-                  >
-                    <option value="0.7">A poc a poc (Infantil/1r)</option>
-                    <option value="0.85">Normal i pausada</option>
-                    <option value="1.0">Estàndard ràpida</option>
-                  </select>
-                </div>
-
-                {/* Mode Accessible Text */}
-                <button
-                  onClick={() => setMostrarTextAccessible(!mostrarTextAccessible)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${mostrarTextAccessible ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-600'}`}
-                >
-                  {mostrarTextAccessible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                  Mode visual (mostra text a la pantalla)
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* VISTA 2: SESSIÓ DE JOC */}
-        {vista === 'joc' && problemesActuals.length > 0 && (
-          <div className="space-y-6 animate-fadeIn">
-            {/* Progrés i dades del curs */}
-            <div className="flex justify-between items-center bg-white px-5 py-3 rounded-xl border border-slate-100 shadow-sm">
-              <div className="flex items-center space-x-2">
-                <span className="bg-teal-100 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold">
-                  Nivell {curs}
-                </span>
-                <span className="text-slate-400 text-xs">·</span>
-                <span className="text-xs font-semibold text-slate-500">
-                  Pregunta {indexPregunta + 1} de {problemesActuals.length}
-                </span>
-              </div>
-              <button 
-                onClick={() => {
-                  window.speechSynthesis.cancel();
-                  setVista('benvinguda');
-                }}
-                className="text-xs font-medium text-rose-600 hover:underline"
-              >
-                Abandona la sessió
-              </button>
-            </div>
-
-            {/* Progress bar */}
-            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
-              <div 
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 h-full transition-all duration-300"
-                style={{ width: `${((indexPregunta) / problemesActuals.length) * 100}%` }}
-              ></div>
-            </div>
-
-            {/* Zona central de la pregunta */}
-            <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-lg border border-slate-100 text-center space-y-6">
-              
-              {/* Botó d'escoltar / Repetir enunciat */}
-              <div className="flex flex-col items-center space-y-3">
-                <button
-                  onClick={handlesEscoltar}
-                  disabled={reproduccionsRestants === 0}
-                  className={`w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all shadow-md transform active:scale-95 ${
-                    reproduccionsRestants > 0 
-                      ? 'bg-teal-600 hover:bg-teal-700 text-white hover:shadow-teal-200 hover:shadow-lg' 
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  <Volume2 className="h-10 w-10 mb-1" />
-                  <span className="text-[10px] font-bold tracking-wider uppercase">Repetir so</span>
-                </button>
-                
-                {/* Indicador de reproduccions restants */}
-                <div className="text-xs font-medium">
-                  {reproduccionsRestants === 2 && (
-                    <span className="text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Enunciat llest (Queden 2 lectures)</span>
-                  )}
-                  {reproduccionsRestants === 1 && (
-                    <span className="text-amber-600 bg-amber-50 px-3 py-1 rounded-full">Darrera oportunitat d'escoltar</span>
-                  )}
-                  {reproduccionsRestants === 0 && (
-                    <span className="text-rose-600 bg-rose-50 px-3 py-1 rounded-full">Lector apagat (Concentra't!)</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Text Alternatiu (Accessible / Visual) */}
-              {(mostrarTextAccessible || !veuSintesiSuportada) && (
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 max-w-lg mx-auto">
-                  <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-1 text-left">Text en pantalla:</p>
-                  <p className="text-lg font-medium text-slate-800 text-left leading-relaxed">
-                    {problemesActuals[indexPregunta]?.text}
-                  </p>
-                </div>
-              )}
-
-              {!veuSintesiSuportada && (
-                <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg max-w-md mx-auto">
-                  La síntesi de veu no està totalment suportada al teu dispositiu. S'ha activat el mode de text automàticament perquè puguis fer l'exercici.
+                <h2 className="text-3xl font-extrabold tracking-tight">
+                  Entrena amb les Sèries Oficials d'El Quinzet
+                </h2>
+                <p className="text-indigo-100 text-sm md:text-base leading-relaxed">
+                  Problemes orals de càlcul mental ràpid. El mestre fa la pregunta oralment i tu escrius el resultat **acompanyat de la unitat**. Recorda: <strong>l'oblit de la unitat invalidarà l'exercici!</strong>
                 </p>
-              )}
+                <div className="flex flex-wrap gap-4 pt-2">
+                  <div className="bg-indigo-900/40 px-4 py-2 rounded-xl text-xs flex items-center gap-2">
+                    <Info className="w-4 h-4 text-sky-300" />
+                    <span>Sèries completes d'educació primària (1-13)</span>
+                  </div>
+                  <div className="bg-indigo-900/40 px-4 py-2 rounded-xl text-xs flex items-center gap-2">
+                    <Volume2 className="w-4 h-4 text-sky-300" />
+                    <span>Lector oral integrat en Català</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-              {/* Input per a la resposta */}
-              <div className="max-w-md mx-auto space-y-2 pt-4">
-                <label className="block text-sm font-bold text-slate-700 text-left">
-                  La teva resposta (Número + Unitat):
+            {/* Configuració de velocitat i visualització de preguntes */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                  <Volume2 className="w-4 h-4 text-indigo-500" />
+                  Velocitat de lectura oral:
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={respostaUsuari}
-                    onChange={(e) => setRespostaUsuari(e.target.value)}
-                    placeholder="Ex: 12 galetes, 60 cèntims, 3 m..."
-                    className="w-full px-5 py-4 border-2 border-slate-200 rounded-xl text-lg font-medium focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition-all text-center placeholder:text-slate-300"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && respostaUsuari.trim() !== '') {
-                        handleSeguent();
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-slate-400 px-1">
-                  <span>No val a fer càlculs escrits!</span>
-                  <span className="font-semibold text-teal-600">S'ha de posar la unitat!</span>
+                <input 
+                  type="range" 
+                  min="0.5" 
+                  max="1.2" 
+                  step="0.05" 
+                  value={speechRate}
+                  onChange={(e) => setSpeechRate(parseFloat(e.target.value))}
+                  className="w-full accent-indigo-600"
+                />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>Més lent</span>
+                  <span>Normal</span>
+                  <span>Ràpid</span>
                 </div>
               </div>
 
-              {/* Botó confirmar */}
-              <div className="pt-2">
-                <button
-                  onClick={handleSeguent}
-                  disabled={respostaUsuari.trim() === ''}
-                  className={`px-8 py-3.5 rounded-xl font-bold text-base shadow-sm transition-all flex items-center justify-center gap-2 mx-auto ${
-                    respostaUsuari.trim() !== ''
-                      ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:from-teal-700 hover:to-emerald-700 hover:shadow-md'
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  Següent pregunta
-                  <ArrowRight className="h-5 w-5" />
-                </button>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                  <Settings className="w-4 h-4 text-indigo-500" />
+                  Visualització de text:
+                </label>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => setHideTextActive(!hideTextActive)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                      hideTextActive 
+                        ? 'bg-amber-50 border-amber-200 text-amber-800' 
+                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {hideTextActive ? "Amagar text del problema: SÍ" : "Amagar text del problema: NO"}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400">
+                  Ideal per forçar l'alumne a escoltar i processar de manera oral.
+                </p>
               </div>
 
+              <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100 flex items-start gap-3">
+                <Lightbulb className="w-5 h-5 text-sky-600 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-sky-900">Regla Oficial:</h4>
+                  <p className="text-xs text-sky-800 leading-normal">
+                    La resposta ha de tenir el número i la unitat. Per exemple, si la resposta és 7, s'ha d'escriure <strong>7 bolets</strong>.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Informació d'ajuda interactiva */}
-            <div className="bg-slate-100 p-4 rounded-xl flex items-start gap-3">
-              <Info className="h-5 w-5 text-slate-500 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-slate-600 space-y-1">
-                <p className="font-bold">Recordatori de validació:</p>
-                <p>
-                  Escriu el número seguit d'un espai i després la paraula que representa la unitat de la pregunta (p. ex: <strong>5 ampolles</strong>, <strong>100 metres</strong>, <strong>4 €</strong>). S'accepten plurals i diferents abreviatures per facilitar-te la resposta.
-                </p>
+            {/* Selector de Sèries i Nivells de Primària */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <Award className="w-5 h-5 text-indigo-600" />
+                Selecciona la Sèrie a practicar:
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(SERIES_DATA).map(([id, info]) => {
+                  const numId = parseInt(id);
+                  return (
+                    <div 
+                      key={id}
+                      className="bg-white hover:bg-indigo-50/20 border border-gray-100 hover:border-indigo-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="bg-indigo-100 text-indigo-700 font-bold text-xs px-2.5 py-1 rounded-full">
+                            {info.nom}
+                          </span>
+                          <span className="text-xs text-gray-400 font-medium">
+                            {info.curs}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-gray-800 group-hover:text-indigo-950 transition-colors">
+                          Càlcul Mental {info.nom}
+                        </h4>
+                        <p className="text-xs text-gray-500 line-clamp-2">
+                          {info.descripció}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-4 pt-2 border-t border-gray-50">
+                        <button
+                          onClick={() => startSeries(numId)}
+                          className="w-full bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 text-xs font-bold py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <Play className="w-3.5 h-3.5" /> Començar Sèrie {id}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Historial local de sessions */}
+            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
+              <h3 className="text-md font-bold text-gray-800 flex items-center gap-2">
+                <History className="w-5 h-5 text-gray-500" />
+                Historial de sessions de pràctica
+              </h3>
+              {localStorage.getItem('quinzet_history') ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-xs text-gray-400">
+                        <th className="py-2">Data</th>
+                        <th className="py-2">Sèrie</th>
+                        <th className="py-2">Nivell</th>
+                        <th className="py-2">Mode</th>
+                        <th className="py-2 text-right">Encerts</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-xs font-medium text-gray-600">
+                      {JSON.parse(localStorage.getItem('quinzet_history') || '[]').map((item, index) => (
+                        <tr key={index} className="border-b border-gray-50 hover:bg-gray-50/50">
+                          <td className="py-2">{item.data}</td>
+                          <td className="py-2 font-bold text-indigo-600">{item.serie}</td>
+                          <td className="py-2">{item.nivell}</td>
+                          <td className="py-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              item.mode === 'Oficial' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'
+                            }`}>
+                              {item.mode}
+                            </span>
+                          </td>
+                          <td className="py-2 text-right font-bold text-gray-800">{item.encerts} / {item.total}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 italic">Encara no has fet cap pràctica. Les teves puntuacions es guardaran aquí.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* VIEW: Exercici de Càlcul Mental Actiu */}
+        {gameState === 'playing' && problems.length > 0 && (
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white rounded-3xl shadow-lg border border-indigo-100 overflow-hidden">
+              
+              {/* Capçalera del joc actiu */}
+              <div className="bg-gradient-to-r from-indigo-600 to-sky-600 text-white px-6 py-4 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-sky-200">
+                    {activeMode === 'training' ? 'Mode Entrenament' : 'Mode Oficial El Quinzet'}
+                  </span>
+                  <h3 className="font-extrabold text-lg">
+                    {SERIES_DATA[selectedSerie].nom} - {SERIES_DATA[selectedSerie].curs}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-white/20 px-3 py-1.5 rounded-full text-xs font-bold">
+                    Problema {currentIndex + 1} de {problems.length}
+                  </span>
+                </div>
+              </div>
+
+              {/* Barra de progrés */}
+              <div className="w-full bg-indigo-100 h-2">
+                <div 
+                  className="bg-indigo-600 h-full transition-all duration-300"
+                  style={{ width: `${((currentIndex) / problems.length) * 100}%` }}
+                />
+              </div>
+
+              {/* Àrea principal de la pregunta */}
+              <div className="p-6 md:p-8 space-y-6 flex flex-col items-center">
+                
+                {/* Visualització oral forçada */}
+                {hideTextActive ? (
+                  <div className="bg-indigo-50/50 p-8 rounded-2xl border border-indigo-100 w-full flex flex-col items-center justify-center space-y-4 shadow-inner min-h-[160px]">
+                    <div className="p-4 bg-indigo-600 rounded-full text-white animate-pulse">
+                      <Volume2 className="w-10 h-10" />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <h4 className="font-bold text-indigo-900">Escolta amb molta atenció!</h4>
+                      <p className="text-xs text-indigo-700/80">L'enunciat s'ha d'escoltar per dictat de veu.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 p-6 md:p-8 rounded-2xl border border-slate-100 w-full min-h-[160px] flex items-center justify-center">
+                    <p className="text-lg md:text-xl font-semibold text-center text-slate-800 leading-relaxed">
+                      {problems[currentIndex].text}
+                    </p>
+                  </div>
+                )}
+
+                {/* Control de lectura en veu alta */}
+                <div className="flex items-center justify-center gap-4 w-full">
+                  <button
+                    onClick={handleRepeatVoice}
+                    disabled={activeMode === 'official' && repeatCount >= 1}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                      activeMode === 'official' && repeatCount >= 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-100'
+                        : 'bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300'
+                    }`}
+                  >
+                    <Volume2 className="w-4 h-4" /> 
+                    {activeMode === 'official' ? `Repetir lectura (${1 - repeatCount} restant)` : 'Escolta en veu alta'}
+                  </button>
+
+                  <button
+                    onClick={() => setHideTextActive(!hideTextActive)}
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all"
+                  >
+                    {hideTextActive ? 'Mostrar text escrit' : 'Amagar text'}
+                  </button>
+                </div>
+
+                {/* Formulari d'entrada per a la resposta de l'alumne */}
+                <form onSubmit={checkAnswer} className="w-full max-w-md pt-4 space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block text-center">
+                      Resposta (Número + Unitat):
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={userAnswer}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        placeholder={inputPlaceholder}
+                        disabled={validationMessage?.type === 'success' || (validationMessage?.type === 'error' && activeMode === 'official')}
+                        className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3.5 text-lg font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-center"
+                        autoFocus
+                      />
+                    </div>
+                    <p className="text-[10px] text-amber-600 font-bold flex items-center justify-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      L'oblit de la unitat (com 'dies' o 'euros') invalida la resposta!
+                    </p>
+                  </div>
+
+                  {/* Mostra avisos o felicitacions */}
+                  {validationMessage && (
+                    <div className={`p-4 rounded-xl border flex items-start gap-3 animate-slideIn ${
+                      validationMessage.type === 'success' 
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                        : validationMessage.type === 'warning'
+                        ? 'bg-amber-50 border-amber-200 text-amber-800'
+                        : 'bg-rose-50 border-rose-200 text-rose-800'
+                    }`}>
+                      {validationMessage.type === 'success' && <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />}
+                      {validationMessage.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />}
+                      {validationMessage.type === 'error' && <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />}
+                      
+                      <p className="text-xs font-medium leading-relaxed">{validationMessage.text}</p>
+                    </div>
+                  )}
+
+                  {/* Accions de la targeta */}
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGameState('menu');
+                        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                      }}
+                      className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-bold py-3 rounded-xl transition-all"
+                    >
+                      Menú principal
+                    </button>
+
+                    {validationMessage?.type === 'success' || (validationMessage?.type === 'error' && activeMode === 'official') ? (
+                      <button
+                        type="button"
+                        onClick={handleNextQuestion}
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md shadow-indigo-100"
+                      >
+                        Següent problema <ArrowRight className="w-4 h-4" />
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        disabled={!userAnswer.trim()}
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-100 disabled:text-gray-400 text-white text-xs font-bold py-3 rounded-xl transition-all shadow-md"
+                      >
+                        Comprova resposta
+                      </button>
+                    )}
+                  </div>
+                </form>
+
               </div>
             </div>
           </div>
         )}
 
-        {/* VISTA 3: RESULTATS */}
-        {vista === 'resultats' && (
-          <div className="space-y-6 animate-fadeIn">
-            {/* Targeta de puntuació global */}
-            <div className="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 text-center space-y-6 relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-600"></div>
+        {/* VIEW: Resultat i correccions de la Sèrie */}
+        {gameState === 'finished' && (
+          <div className="max-w-xl mx-auto text-center space-y-8 animate-fadeIn">
+            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl space-y-6">
               
-              <div className="inline-flex p-4 bg-emerald-50 rounded-full text-emerald-600">
-                <Trophy className="h-12 w-12 text-yellow-500 animate-bounce" />
-              </div>
-              
-              <div className="space-y-1">
-                <h2 className="text-3xl font-black text-slate-900">Sessió de Càlcul Completada!</h2>
-                <p className="text-slate-500 text-sm">Nivell d'El Quinzet: Curs {curs}</p>
-              </div>
-
-              {/* Marcador gran */}
-              <div className="bg-slate-50 py-4 px-6 rounded-2xl inline-block">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Puntuació total d'encerts</p>
-                <p className="text-5xl font-black text-slate-800">
-                  {encertsTotals} <span className="text-2xl text-slate-400 font-bold">/ {problemesActuals.length}</span>
+              <div className="flex flex-col items-center space-y-2">
+                <div className="bg-amber-100 text-amber-600 p-4 rounded-full shadow-inner animate-bounce">
+                  <Award className="w-16 h-16" />
+                </div>
+                <h2 className="text-2xl font-extrabold text-indigo-950">
+                  Sessió finalitzada!
+                </h2>
+                <p className="text-xs text-gray-500 font-medium">
+                  Has completat els problemes de la Sèrie {selectedSerie}
                 </p>
               </div>
 
-              {/* Comentari de feedback */}
-              <div className="max-w-md mx-auto">
-                {encertsTotals === problemesActuals.length ? (
-                  <p className="text-emerald-700 bg-emerald-50 py-2.5 px-4 rounded-xl font-semibold text-sm">
-                    ✨ Excel·lent! Ets un mestre autèntic d'El Quinzet! No has fallat ni les unitats!
-                  </p>
-                ) : encertsTotals >= problemesActuals.length * 0.7 ? (
-                  <p className="text-teal-700 bg-teal-50 py-2.5 px-4 rounded-xl font-semibold text-sm">
-                    👍 Molt bé! Bona agilitat mental i ús de les unitats corresponents.
-                  </p>
-                ) : (
-                  <p className="text-amber-700 bg-amber-50 py-2.5 px-4 rounded-xl font-semibold text-sm">
-                    💪 Continua practicant! Perfecciona el càlcul de les operacions o l'escriptura final de la unitat de la pregunta.
-                  </p>
-                )}
+              {/* Punts */}
+              <div className="bg-gradient-to-r from-indigo-50 to-sky-50 rounded-2xl p-6 border border-indigo-100/50 flex items-center justify-around">
+                <div className="text-center">
+                  <span className="text-xs text-indigo-600/80 uppercase tracking-widest font-extrabold block">
+                    Puntuació
+                  </span>
+                  <span className="text-4xl font-black text-indigo-900 block mt-1">
+                    {score} <span className="text-xl text-indigo-400 font-bold">/ {problems.length}</span>
+                  </span>
+                </div>
+                <div className="h-10 w-px bg-indigo-200" />
+                <div className="text-center">
+                  <span className="text-xs text-indigo-600/80 uppercase tracking-widest font-extrabold block">
+                    Percentatge
+                  </span>
+                  <span className="text-4xl font-black text-indigo-900 block mt-1">
+                    {Math.round((score / problems.length) * 100)}%
+                  </span>
+                </div>
               </div>
 
-              {/* Botons d'acció */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <button
-                  onClick={() => iniciarSessio(curs)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
-                >
-                  <RotateCcw className="h-4 w-4" /> Torna-ho a provar (Nivell {curs})
-                </button>
-                <button
-                  onClick={() => setVista('benvinguda')}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl transition-all"
-                >
-                  Tria un altre curs
-                </button>
+              {/* Ràting amb estrelles */}
+              <div className="flex items-center justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((starValue) => {
+                  const limit = Math.round((score / problems.length) * 5);
+                  return (
+                    <Sparkles 
+                      key={starValue} 
+                      className={`w-8 h-8 ${
+                        starValue <= limit ? 'text-amber-400 fill-amber-300' : 'text-gray-200'
+                      }`} 
+                    />
+                  );
+                })}
               </div>
-            </div>
 
-            {/* Revisió detallada pregunta per pregunta */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-teal-600" />
-                Resultat de cada exercici:
-              </h3>
-
-              <div className="divide-y divide-slate-100">
-                {respostesGuardades.map((resp, i) => (
-                  <div key={i} className="py-4 first:pt-0 last:pb-0 space-y-2">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1">
-                        <span className="text-xs font-bold text-slate-400">EXERCICI {i + 1}</span>
-                        <p className="text-sm font-medium text-slate-800 leading-relaxed">{resp.pregunta}</p>
-                      </div>
-                      <div>
-                        {resp.esCorrecte ? (
-                          <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Correcte
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full">
-                            <XCircle className="h-4 w-4 text-rose-500" /> Incorrecte
-                          </span>
+              {/* Llista dels problemes i les correccions */}
+              <div className="text-left space-y-3 pt-4 border-t border-gray-100">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Revisió detallada dels problemes:
+                </h4>
+                
+                <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                  {userAnswersHistory.map((item, index) => (
+                    <div 
+                      key={index} 
+                      className={`p-3 rounded-xl border text-xs leading-relaxed space-y-1.5 ${
+                        item.isCorrect 
+                          ? 'bg-emerald-50/50 border-emerald-100 text-emerald-900' 
+                          : 'bg-rose-50/50 border-rose-100 text-rose-950'
+                      }`}
+                    >
+                      <p className="font-semibold text-slate-800">
+                        {index + 1}. {item.question}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
+                        <span className="text-gray-500">La teva resposta:</span>
+                        <span className={item.isCorrect ? 'text-emerald-700' : 'text-rose-700'}>
+                          {item.user}
+                        </span>
+                        {!item.isCorrect && (
+                          <>
+                            <span className="text-gray-400">|</span>
+                            <span className="text-gray-500">Resposta correcta:</span>
+                            <span className="text-indigo-700">{item.correct}</span>
+                          </>
                         )}
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                      <div className="bg-slate-50 p-2 rounded-lg">
-                        <span className="text-slate-400 block font-semibold">Resposta rebuda:</span>
-                        <span className={`font-bold ${resp.esCorrecte ? 'text-emerald-700' : 'text-rose-700'}`}>
-                          {resp.respostaEscrita || "(Sense resposta)"}
-                        </span>
-                      </div>
-                      <div className="bg-slate-50 p-2 rounded-lg">
-                        <span className="text-slate-400 block font-semibold">Resposta correcta de referència:</span>
-                        <span className="font-bold text-teal-800">{resp.solucioCorrecta}</span>
-                      </div>
-                    </div>
-
-                    {!resp.esCorrecte && (
-                      <p className="text-xs text-rose-600 font-semibold bg-rose-50/50 p-2 rounded-lg">
-                        ⚠️ Motiu d'invalidació: {resp.motiuError}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* VISTA 4: CONFIGURADOR / PANNELL DE GESTIÓ DOCENT */}
-        {vista === 'configurador' && (
-          <div className="space-y-6 animate-fadeIn">
-            {/* Capçalera del gestor */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">Edició dels Exercicis per als Docents</h2>
-              <p className="text-slate-600 text-sm">
-                Des d'aquí es poden visualitzar els 30 problemes base assignats a cada curs de Primària. Pots eliminar els problemes originals i crear-ne de personalitzats adaptats al teu propi grup-classe.
-              </p>
-            </div>
-
-            {/* Selector de Curs pel Banc */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
-              <label className="text-sm font-bold text-slate-700">Selecciona el curs que vols consultar o modificar:</label>
-              <select
-                value={curs}
-                onChange={(e) => setCurs(e.target.value)}
-                className="bg-slate-100 border-none rounded-lg py-1.5 px-3 font-bold text-teal-800 focus:ring-2 focus:ring-teal-500"
-              >
-                {Object.keys(bancPlantilles).map(c => (
-                  <option key={c} value={c}>Curs {c}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              {/* Formulari d'afegir pregunta manual */}
-              <div className="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-fit space-y-4">
-                <h3 className="font-bold text-slate-900 flex items-center gap-1.5 border-b pb-2">
-                  <Plus className="h-5 w-5 text-teal-600" /> Nou problema personalitzat
-                </h3>
-                
-                <form onSubmit={handleAfegirProblema} className="space-y-3.5">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase block">Enunciat del problema:</label>
-                    <textarea
-                      value={nouProblemText}
-                      onChange={(e) => setNouProblemText(e.target.value)}
-                      placeholder="Ex: Tinc 12 llapis i en dono 4. Quants llapis em queden?"
-                      rows="3"
-                      className="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                    ></textarea>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-500 uppercase block">Valor correcte:</label>
-                      <input
-                        type="number"
-                        step="any"
-                        value={nouProblemNum}
-                        onChange={(e) => setNouProblemNum(e.target.value)}
-                        placeholder="Ex: 8"
-                        className="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-500 uppercase block">Curs destinat:</label>
-                      <div className="text-sm font-extrabold text-teal-800 p-2.5 bg-slate-100 rounded-lg text-center">
-                        {curs}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase block">Unitat correcta (separada per comes):</label>
-                    <input
-                      type="text"
-                      value={nouProblemUnitats}
-                      onChange={(e) => setNouProblemUnitats(e.target.value)}
-                      placeholder="Ex: llapis, llapisos"
-                      className="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                    />
-                    <span className="text-[10px] text-slate-400 block">Indica la unitat i plurals vàlids per guiar la correcció de l'exercici.</span>
-                  </div>
-
-                  {errorConfig && (
-                    <p className="text-xs text-rose-600 bg-rose-50 p-2 rounded">{errorConfig}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1"
-                  >
-                    Crea i afegeix al curs
-                  </button>
-                </form>
-              </div>
-
-              {/* Llista de problemes actuals d'aquell curs */}
-              <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 className="font-bold text-slate-900 border-b pb-2 flex justify-between items-center">
-                  <span>Problemes disponibles a Curs {curs}</span>
-                  <span className="text-xs text-slate-400">Total: {bancPlantilles[curs]?.length || 0}</span>
-                </h3>
-
-                <div className="space-y-3 max-h-[450px] overflow-y-auto pr-1">
-                  {bancPlantilles[curs]?.map((prob, i) => {
-                    // Si és dinàmic, mostrem la plantilla descriptiva per saber com funciona
-                    const ésDinàmic = typeof prob.gen === 'function' && !prob.id?.includes('custom');
-                    return (
-                      <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start justify-between gap-3 text-xs">
-                        <div className="space-y-1.5 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-black text-slate-400">Nº {i + 1}</span>
-                            {ésDinàmic ? (
-                              <span className="bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">
-                                Dinàmic (Valors variables)
-                              </span>
-                            ) : (
-                              <span className="bg-amber-100 text-amber-800 font-extrabold px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">
-                                Estàtic (Mestre)
-                              </span>
-                            )}
-                            <span className="bg-indigo-100 text-indigo-800 font-semibold px-1.5 py-0.5 rounded text-[10px]">
-                              Unitats: {prob.unitats ? prob.unitats.join(', ') : 'Dinàmiques'}
-                            </span>
-                          </div>
-                          <p className="text-slate-700 font-medium leading-relaxed">
-                            {prob.text}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => eliminarProblema(i)}
-                          className="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-colors flex-shrink-0"
-                          title="Eliminar problema d'aquest llistat"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    );
-                  })}
-
-                  {(!bancPlantilles[curs] || bancPlantilles[curs].length === 0) && (
-                    <p className="text-slate-400 text-center py-8">No hi ha cap plantilla ni problema registrat per a aquest curs.</p>
-                  )}
+                  ))}
                 </div>
               </div>
 
-            </div>
+              {/* Accions finals */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 pt-4">
+                <button
+                  onClick={() => startSeries(selectedSerie)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-3.5 px-4 rounded-xl transition-all shadow-md shadow-indigo-100"
+                >
+                  Torna a intentar la Sèrie {selectedSerie}
+                </button>
+                <button
+                  onClick={() => setGameState('menu')}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-3.5 px-4 rounded-xl transition-all"
+                >
+                  Llista de Sèries
+                </button>
+              </div>
 
-            {/* Retornar */}
-            <div className="text-center">
-              <button
-                onClick={() => setVista('benvinguda')}
-                className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-6 py-2 rounded-xl transition-all text-sm"
-              >
-                Torna a la pantalla principal
-              </button>
             </div>
           </div>
         )}
 
       </main>
-
-      {/* FOOTER */}
-      <footer className="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
-          <div>
-            <p className="font-bold text-slate-300">Mètode de càlcul mental global "El Quinzet"</p>
-            <p className="text-slate-500">Desenvolupat d'acord amb els paràmetres de la Versió oficial de diagnòstic escolar.</p>
-          </div>
-          <div>
-            <p className="text-slate-500">Aprenentatge actiu, divertit i adaptatiu.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
