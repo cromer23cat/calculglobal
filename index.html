@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>El Quinzet: Càlcul Mental</title>
-    <!-- Tailwind CSS para el diseño visual -->
+    <!-- Tailwind CSS per al disseny visual -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React y ReactDOM para el funcionamiento de la aplicación -->
+    <!-- React i ReactDOM per al funcionament de l'aplicació -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <!-- Babel para compilar el código JSX directamente en el navegador -->
+    <!-- Babel per compilar el codi JSX directament al navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -184,7 +184,7 @@
           }
         };
 
-        // Componentes de iconos en formato SVG para no depender de dependencias npm
+        // Icones SVG integrades
         const IconBookOpen = () => (
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -198,18 +198,18 @@
         );
 
         const IconCheckCircle = () => (
-          <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <svg className="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         );
 
         const IconXCircle = () => (
-          <svg className="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <svg className="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         );
 
-        const IconAward = ({ className }) => (
+        const IconAward = ({ className = "w-6 h-6" }) => (
           <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
           </svg>
@@ -228,37 +228,19 @@
           </svg>
         );
 
-        const IconInfo = () => (
-          <svg className="w-4 h-4 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
-
         const IconHistory = () => (
           <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         );
 
-        const IconAlertTriangle = ({ className }) => (
+        const IconAlertTriangle = ({ className = "w-5 h-5" }) => (
           <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         );
 
-        const IconLightbulb = () => (
-          <svg className="w-5 h-5 text-sky-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-        );
-
-        const IconPlay = () => (
-          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        );
-
-        const IconSparkles = ({ className }) => (
+        const IconSparkles = ({ className = "w-5 h-5" }) => (
           <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
           </svg>
@@ -280,7 +262,12 @@
           const [repeatCount, setRepeatCount] = useState(0);
           
           const [validationMessage, setValidationMessage] = useState(null);
-          const [inputPlaceholder, setInputPlaceholder] = useState('');
+          const [historyList, setHistoryList] = useState([]);
+
+          useEffect(() => {
+            const saved = JSON.parse(localStorage.getItem('quinzet_history') || '[]');
+            setHistoryList(saved);
+          }, [gameState]);
 
           const playSound = (type) => {
             try {
@@ -351,10 +338,9 @@
             setUserAnswer('');
             setUserAnswersHistory([]);
             setScore(0);
+            setStreak(0);
             setRepeatCount(0);
             setValidationMessage(null);
-            
-            setInputPlaceholder(`Exemple: ${selected[0].numCorrect} ${selected[0].unitCorrect}`);
 
             setTimeout(() => {
               speakQuestion(selected[0].text, true);
@@ -368,7 +354,6 @@
               setUserAnswer('');
               setValidationMessage(null);
               setRepeatCount(0);
-              setInputPlaceholder(`Exemple: ${problems[nextIdx].numCorrect} ${problems[nextIdx].unitCorrect}`);
               
               setTimeout(() => {
                 speakQuestion(problems[nextIdx].text, true);
@@ -553,414 +538,338 @@
               <main className="max-w-6xl mx-auto px-4 mt-8">
                 {gameState === 'menu' && (
                   <div className="space-y-8">
-                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-                      <div className="absolute top-0 right-0 transform translate-x-12 -translate-y-12 opacity-10 pointer-events-none">
-                        <IconAward className="w-96 h-96" />
-                      </div>
-                      <div className="relative z-10 max-w-2xl space-y-4">
-                        <span className="bg-white/20 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
-                          Mètode Oficial Adaptat
-                        </span>
-                        <h2 className="text-3xl font-extrabold tracking-tight">
-                          Entrena amb les Sèries Oficials d'El Quinzet
+                    {/* Banner explicatiu d'El Quinzet */}
+                    <div className="bg-indigo-900 text-white p-6 rounded-3xl shadow-xl relative overflow-hidden">
+                      <div className="relative z-10 max-w-3xl">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-800/80 rounded-full text-indigo-200 text-xs font-semibold mb-3 border border-indigo-700">
+                          <IconSparkles /> Metodologia de Càlcul Mental
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
+                          Instruccions Oficials d'El Quinzet
                         </h2>
-                        <p className="text-indigo-100 text-sm md:text-base leading-relaxed">
-                          Problemes orals de càlcul mental ràpid. El mestre fa la pregunta oralment i tu escrius el resultat **acompanyat de la unitat**. Recorda: <strong>l'oblit de la unitat invalidarà l'exercici!</strong>
+                        <p className="text-indigo-200 text-sm leading-relaxed mb-4">
+                          Cada exercici s'ha de respondre escrivint el <strong>nombre seguit de la unitat</strong> (per exemple, <i>"3 boles"</i>, <i>"12 euros"</i> o <i>"3/4 de taronja"</i>). La manca de la unitat invalida la resposta!
                         </p>
-                        <div className="flex flex-wrap gap-4 pt-2">
-                          <div className="bg-indigo-900/40 px-4 py-2 rounded-xl text-xs flex items-center gap-2">
-                            <IconInfo />
-                            <span>Sèries completes d'educació primària (1-13)</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-indigo-950/60 p-4 rounded-2xl border border-indigo-800/50">
+                          <div>
+                            <span className="font-bold text-sky-300">Mode Entrenament:</span> Es pot llegir el text del problema i escoltar l'àudio totes les vegades que calgui.
+                          </div>
+                          <div>
+                            <span className="font-bold text-sky-300">Mode Oficial:</span> El text s'oculta. El mestre o l'àudio llegeix el problema una sola vegada (amb opció d'una única repetició).
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
-                          <IconVolume2 />
-                          Velocitat de lectura oral:
-                        </label>
-                        <input 
-                          type="range" 
-                          min="0.5" 
-                          max="1.2" 
-                          step="0.05" 
-                          value={speechRate}
-                          onChange={(e) => setSpeechRate(parseFloat(e.target.value))}
-                          className="w-full accent-indigo-600"
-                        />
-                        <div className="flex justify-between text-xs text-gray-400">
-                          <span>Més lent</span>
-                          <span>Normal</span>
-                          <span>Ràpid</span>
-                        </div>
+                    {/* Selector de velocitat de veu */}
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <IconSettings />
+                        <span className="text-xs font-bold text-gray-700">Velocitat del lector de veu:</span>
                       </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
-                          <IconSettings />
-                          Visualització de text:
-                        </label>
-                        <div className="flex items-center gap-2 pt-1">
+                      <div className="flex items-center gap-3">
+                        {[0.7, 0.85, 1.0].map((rate) => (
                           <button
-                            onClick={() => setHideTextActive(!hideTextActive)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                              hideTextActive 
-                                ? 'bg-amber-50 border-amber-200 text-amber-800' 
-                                : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                            key={rate}
+                            onClick={() => setSpeechRate(rate)}
+                            className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                              speechRate === rate
+                                ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                             }`}
                           >
-                            {hideTextActive ? "Amagar text del problema: SÍ" : "Amagar text del problema: NO"}
+                            {rate === 0.7 ? 'Lenta (0.7x)' : rate === 0.85 ? 'Normal (0.85x)' : 'Ràpida (1.0x)'}
                           </button>
-                        </div>
-                        <p className="text-xs text-gray-400">
-                          Ideal per forçar l'alumne a escoltar auditivament.
-                        </p>
-                      </div>
-
-                      <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100 flex items-start gap-3">
-                        <IconLightbulb />
-                        <div className="space-y-1">
-                          <h4 className="text-xs font-bold text-sky-900">Regla Oficial:</h4>
-                          <p className="text-xs text-sky-800 leading-normal">
-                            La resposta ha de tenir el número i la unitat. Per exemple, si la resposta és 7, s'ha d'escriure <strong>7 bolets</strong>.
-                          </p>
-                        </div>
+                        ))}
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <IconAward className="w-5 h-5 text-indigo-600" />
-                        Selecciona la Sèrie a practicar:
+                    {/* Graella de Sèries */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <IconBookOpen /> Selecciona una Sèrie de Problemes
                       </h3>
-
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Object.entries(SERIES_DATA).map(([id, info]) => {
-                          const numId = parseInt(id);
-                          return (
-                            <div 
-                              key={id}
-                              className="bg-white hover:bg-indigo-50/20 border border-gray-100 hover:border-indigo-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
-                            >
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="bg-indigo-100 text-indigo-700 font-bold text-xs px-2.5 py-1 rounded-full">
-                                    {info.nom}
-                                  </span>
-                                  <span className="text-xs text-gray-400 font-medium">
-                                    {info.curs}
-                                  </span>
-                                </div>
-                                <h4 className="font-bold text-gray-800 group-hover:text-indigo-950 transition-colors">
-                                  Càlcul Mental {info.nom}
-                                </h4>
-                                <p className="text-xs text-gray-500 line-clamp-2">
-                                  {info.descripció}
-                                </p>
+                        {Object.entries(SERIES_DATA).map(([id, serie]) => (
+                          <div
+                            key={id}
+                            className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-indigo-200 flex flex-col justify-between group"
+                          >
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-lg">
+                                  {serie.nom}
+                                </span>
+                                <span className="text-xs font-semibold text-gray-400">
+                                  {serie.curs}
+                                </span>
                               </div>
-
-                              <div className="flex items-center gap-2 mt-4 pt-2 border-t border-gray-50">
-                                <button
-                                  onClick={() => startSeries(numId)}
-                                  className="w-full bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 text-xs font-bold py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5"
-                                >
-                                  <IconPlay /> Començar Sèrie {id}
-                                </button>
-                              </div>
+                              <p className="text-sm text-gray-600 mb-4">
+                                {serie.descripció}
+                              </p>
                             </div>
-                          );
-                        })}
+                            <button
+                              onClick={() => startSeries(Number(id))}
+                              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 group-hover:scale-[1.01]"
+                            >
+                              Començar Sèrie <IconArrowRight />
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
-                      <h3 className="text-md font-bold text-gray-800 flex items-center gap-2">
-                        <IconHistory />
-                        Historial de sessions de pràctica
-                      </h3>
-                      {localStorage.getItem('quinzet_history') ? (
+                    {/* Historial de resultats */}
+                    {historyList.length > 0 && (
+                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 className="text-md font-bold text-gray-800 mb-4 flex items-center gap-2">
+                          <IconHistory /> Darrers Resultats Guardats
+                        </h3>
                         <div className="overflow-x-auto">
-                          <table className="w-full text-left border-collapse">
-                            <thead>
-                              <tr className="border-b border-gray-100 text-xs text-gray-400">
-                                <th className="py-2">Data</th>
-                                <th className="py-2">Sèrie</th>
-                                <th className="py-2">Nivell</th>
-                                <th className="py-2">Mode</th>
-                                <th className="py-2 text-right">Encerts</th>
+                          <table className="w-full text-left text-xs text-gray-600">
+                            <thead className="bg-gray-50 text-gray-500 font-semibold border-b border-gray-100">
+                              <tr>
+                                <th className="p-3">Data</th>
+                                <th className="p-3">Sèrie</th>
+                                <th className="p-3">Nivell</th>
+                                <th className="p-3">Mode</th>
+                                <th className="p-3">Encerts</th>
                               </tr>
                             </thead>
-                            <tbody className="text-xs font-medium text-gray-600">
-                              {JSON.parse(localStorage.getItem('quinzet_history') || '[]').map((item, index) => (
-                                <tr key={index} className="border-b border-gray-50 hover:bg-gray-50/50">
-                                  <td className="py-2">{item.data}</td>
-                                  <td className="py-2 font-bold text-indigo-600">{item.serie}</td>
-                                  <td className="py-2">{item.nivell}</td>
-                                  <td className="py-2">
+                            <tbody className="divide-y divide-gray-100">
+                              {historyList.map((item, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50/50">
+                                  <td className="p-3">{item.data}</td>
+                                  <td className="p-3 font-semibold text-gray-800">{item.serie}</td>
+                                  <td className="p-3">{item.nivell}</td>
+                                  <td className="p-3">
                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                      item.mode === 'Oficial' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'
+                                      item.mode === 'Oficial' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
                                     }`}>
                                       {item.mode}
                                     </span>
                                   </td>
-                                  <td className="py-2 text-right font-bold text-gray-800">{item.encerts} / {item.total}</td>
+                                  <td className="p-3 font-bold text-indigo-600">{item.encerts} / {item.total}</td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
                         </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {gameState === 'playing' && (
+                  <div className="max-w-2xl mx-auto space-y-6">
+                    {/* Barra de progrés */}
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                      <button
+                        onClick={() => setGameState('menu')}
+                        className="text-xs font-semibold text-gray-500 hover:text-gray-800"
+                      >
+                        ← Tornar al menú
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-gray-400">
+                          Pregunta {currentIndex + 1} de {problems.length}
+                        </span>
+                        <div className="w-24 bg-gray-100 h-2 rounded-full overflow-hidden">
+                          <div
+                            className="bg-indigo-600 h-full transition-all duration-300"
+                            style={{ width: `${((currentIndex + 1) / problems.length) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Targeta del problema */}
+                    <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 text-center space-y-6 relative overflow-hidden">
+                      <div className="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">
+                        {SERIES_DATA[selectedSerie].nom} · Problema {problems[currentIndex].id}
+                      </div>
+
+                      {/* Contingut del problema */}
+                      {activeMode === 'official' && hideTextActive ? (
+                        <div className="py-8 bg-indigo-50/50 rounded-2xl border border-dashed border-indigo-200">
+                          <p className="text-indigo-900 font-bold text-lg mb-2">
+                            🎧 Escolta el problema atentament
+                          </p>
+                          <p className="text-xs text-indigo-600 max-w-md mx-auto">
+                            En el mode oficial d'El Quinzet, el text del problema s'oculta per treballar la memòria auditiva i la concentració.
+                          </p>
+                        </div>
                       ) : (
-                        <p className="text-xs text-gray-400 italic">Encara no has fet cap pràctica. Les teves puntuacions es guardaran aquí.</p>
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 leading-relaxed px-4">
+                          "{problems[currentIndex].text}"
+                        </h2>
+                      )}
+
+                      {/* Botons d'àudio */}
+                      <div className="flex items-center justify-center gap-3">
+                        <button
+                          onClick={handleRepeatVoice}
+                          disabled={activeMode === 'official' && repeatCount >= 1}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                            activeMode === 'official' && repeatCount >= 1
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-sky-50 text-sky-700 hover:bg-sky-100'
+                          }`}
+                        >
+                          <IconVolume2 />
+                          {activeMode === 'official'
+                            ? repeatCount >= 1 ? 'Sense relectures restants' : 'Repetir àudio (1 restant)'
+                            : 'Escoltar problema de nou'}
+                        </button>
+
+                        {activeMode === 'official' && (
+                          <button
+                            onClick={() => setHideTextActive(!hideTextActive)}
+                            className="px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-xs font-semibold"
+                          >
+                            {hideTextActive ? 'Mostrar text' : 'Ocultar text'}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Formulari de resposta */}
+                      <form onSubmit={checkAnswer} className="pt-4 space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                            Escriu la teva resposta (Nombre + Unitat):
+                          </label>
+                          <input
+                            type="text"
+                            value={userAnswer}
+                            onChange={(e) => setUserAnswer(e.target.value)}
+                            placeholder="Exemple: 5 boles"
+                            className="w-full max-w-md px-5 py-3.5 text-center text-lg font-bold bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-indigo-600 focus:bg-white focus:outline-none transition-all shadow-inner"
+                            autoFocus
+                          />
+                        </div>
+
+                        <div className="flex justify-center gap-3">
+                          <button
+                            type="submit"
+                            className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm shadow-md shadow-indigo-100 transition-all hover:scale-[1.02]"
+                          >
+                            Validar Resposta
+                          </button>
+                          
+                          {activeMode === 'training' && validationMessage?.type === 'success' && (
+                            <button
+                              type="button"
+                              onClick={handleNextQuestion}
+                              className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-md transition-all flex items-center gap-2"
+                            >
+                              Següent <IconArrowRight />
+                            </button>
+                          )}
+                        </div>
+                      </form>
+
+                      {/* Missatge de validació */}
+                      {validationMessage && (
+                        <div
+                          className={`p-4 rounded-2xl text-xs font-medium text-left flex items-start gap-3 transition-all ${
+                            validationMessage.type === 'success'
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              : validationMessage.type === 'warning'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                              : 'bg-rose-50 text-rose-800 border border-rose-200'
+                          }`}
+                        >
+                          {validationMessage.type === 'success' && <IconCheckCircle />}
+                          {validationMessage.type === 'warning' && <IconAlertTriangle className="text-amber-600 shrink-0" />}
+                          {validationMessage.type === 'error' && <IconXCircle />}
+                          <div>
+                            <p className="font-bold mb-0.5">
+                              {validationMessage.type === 'success' ? 'Molt bé!' : validationMessage.type === 'warning' ? 'Atenció!' : 'Incorrecte'}
+                            </p>
+                            <p>{validationMessage.text}</p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
                 )}
 
-                {gameState === 'playing' && problems.length > 0 && (
-                  <div className="max-w-3xl mx-auto">
-                    <div className="bg-white rounded-3xl shadow-lg border border-indigo-100 overflow-hidden">
-                      <div className="bg-gradient-to-r from-indigo-600 to-sky-600 text-white px-6 py-4 flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-bold uppercase tracking-widest text-sky-200">
-                            {activeMode === 'training' ? 'Mode Entrenament' : 'Mode Oficial El Quinzet'}
-                          </span>
-                          <h3 className="font-extrabold text-lg">
-                            {SERIES_DATA[selectedSerie].nom} - {SERIES_DATA[selectedSerie].curs}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="bg-white/20 px-3 py-1.5 rounded-full text-xs font-bold">
-                            Problema {currentIndex + 1} de {problems.length}
-                          </span>
-                        </div>
-                      </div>
+                {gameState === 'finished' && (
+                  <div className="max-w-xl mx-auto bg-white p-8 rounded-3xl shadow-xl border border-gray-100 text-center space-y-6">
+                    <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                      <IconAward className="w-8 h-8" />
+                    </div>
 
-                      <div className="w-full bg-indigo-100 h-2">
-                        <div 
-                          className="bg-indigo-600 h-full transition-all duration-300"
-                          style={{ width: `${((currentIndex) / problems.length) * 100}%` }}
-                        />
-                      </div>
+                    <div>
+                      <h2 className="text-2xl font-extrabold text-gray-800">
+                        Sèrie Completada!
+                      </h2>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {SERIES_DATA[selectedSerie].nom} · {SERIES_DATA[selectedSerie].curs}
+                      </p>
+                    </div>
 
-                      <div className="p-6 md:p-8 space-y-6 flex flex-col items-center">
-                        {hideTextActive ? (
-                          <div className="bg-indigo-50/50 p-8 rounded-2xl border border-indigo-100 w-full flex flex-col items-center justify-center space-y-4 shadow-inner min-h-[160px]">
-                            <div className="p-4 bg-indigo-600 rounded-full text-white animate-pulse">
-                              <IconVolume2 />
-                            </div>
-                            <div className="text-center space-y-1">
-                              <h4 className="font-bold text-indigo-900">Escolta amb molta atenció!</h4>
-                              <p className="text-xs text-indigo-700/80">L'enunciat s'ha d'escriure per dictat de veu.</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="bg-slate-50 p-6 md:p-8 rounded-2xl border border-slate-100 w-full min-h-[160px] flex items-center justify-center">
-                            <p className="text-lg md:text-xl font-semibold text-center text-slate-800 leading-relaxed">
-                              {problems[currentIndex].text}
-                            </p>
-                          </div>
-                        )}
+                    <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
+                      <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">
+                        Puntuació Final
+                      </p>
+                      <p className="text-4xl font-extrabold text-indigo-700">
+                        {score} / {problems.length}
+                      </p>
+                      <p className="text-xs text-indigo-600 font-medium mt-2">
+                        {score === problems.length
+                          ? "🎉 Felicitats! Has aconseguit un ple absolut!"
+                          : score >= problems.length / 2
+                          ? "👍 Molt bona feina! Segueix practicant per millorar."
+                          : "💪 Bon intent! Torna-ho a provar per millorar la nota."}
+                      </p>
+                    </div>
 
-                        <div className="flex items-center justify-center gap-4 w-full">
-                          <button
-                            type="button"
-                            onClick={handleRepeatVoice}
-                            disabled={activeMode === 'official' && repeatCount >= 1}
-                            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
-                              activeMode === 'official' && repeatCount >= 1
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-100'
-                                : 'bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300'
+                    {/* Resum de respostes */}
+                    <div className="text-left space-y-3">
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Resum de l'exercici:
+                      </h3>
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        {userAnswersHistory.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className={`p-3 rounded-xl border text-xs flex items-start justify-between gap-3 ${
+                              item.isCorrect
+                                ? 'bg-emerald-50/50 border-emerald-100'
+                                : 'bg-rose-50/50 border-rose-100'
                             }`}
                           >
-                            <IconVolume2 /> 
-                            {activeMode === 'official' ? `Repetir lectura (${1 - repeatCount} restant)` : 'Escolta en veu alta'}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setHideTextActive(!hideTextActive)}
-                            className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all"
-                          >
-                            {hideTextActive ? 'Mostrar text escrit' : 'Amagar text'}
-                          </button>
-                        </div>
-
-                        <form onSubmit={checkAnswer} className="w-full max-w-md pt-4 space-y-4">
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block text-center">
-                              Resposta (Número + Unitat):
-                            </label>
-                            <div className="relative">
-                              <input
-                                type="text"
-                                value={userAnswer}
-                                onChange={(e) => setUserAnswer(e.target.value)}
-                                placeholder={inputPlaceholder}
-                                disabled={validationMessage?.type === 'success' || (validationMessage?.type === 'error' && activeMode === 'official')}
-                                className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3.5 text-lg font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-center"
-                                autoFocus
-                              />
+                            <div>
+                              <p className="font-semibold text-gray-800 mb-1">{item.question}</p>
+                              <p className="text-gray-500">
+                                La teva resposta: <span className="font-bold">{item.user}</span>
+                              </p>
+                              {!item.isCorrect && (
+                                <p className="text-emerald-700 font-bold mt-0.5">
+                                  Correcta: {item.correct}
+                                </p>
+                              )}
                             </div>
-                            <p className="text-[10px] text-amber-600 font-bold flex items-center justify-center gap-1 text-center">
-                              <IconAlertTriangle className="w-3.5 h-3.5" />
-                              L'oblit de la unitat (com 'dies' o 'euros') invalida la resposta!
-                            </p>
+                            {item.isCorrect ? <IconCheckCircle /> : <IconXCircle />}
                           </div>
-
-                          {validationMessage && (
-                            <div className={`p-4 rounded-xl border flex items-start gap-3 animate-slideIn ${
-                              validationMessage.type === 'success' 
-                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
-                                : validationMessage.type === 'warning'
-                                ? 'bg-amber-50 border-amber-200 text-amber-800'
-                                : 'bg-rose-50 border-rose-200 text-rose-800'
-                            }`}>
-                              {validationMessage.type === 'success' && <IconCheckCircle />}
-                              {validationMessage.type === 'warning' && <IconAlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />}
-                              {validationMessage.type === 'error' && <IconXCircle />}
-                              
-                              <p className="text-xs font-medium leading-relaxed">{validationMessage.text}</p>
-                            </div>
-                          )}
-
-                          <div className="flex items-center gap-3 pt-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setGameState('menu');
-                                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-                              }}
-                              className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-bold py-3 rounded-xl transition-all"
-                            >
-                              Menú principal
-                            </button>
-
-                            {validationMessage?.type === 'success' || (validationMessage?.type === 'error' && activeMode === 'official') ? (
-                              <button
-                                type="button"
-                                onClick={handleNextQuestion}
-                                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md shadow-indigo-100"
-                              >
-                                Següent problema <IconArrowRight />
-                              </button>
-                            ) : (
-                              <button
-                                type="submit"
-                                disabled={!userAnswer.trim()}
-                                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-100 disabled:text-gray-400 text-white text-xs font-bold py-3 rounded-xl transition-all shadow-md"
-                              >
-                                Comprova resposta
-                              </button>
-                            )}
-                          </div>
-                        </form>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {gameState === 'finished' && (
-                  <div className="max-w-xl mx-auto text-center space-y-8 animate-fadeIn">
-                    <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl space-y-6">
-                      <div className="flex flex-col items-center space-y-2">
-                        <div className="bg-amber-100 text-amber-600 p-4 rounded-full shadow-inner animate-bounce">
-                          <IconAward className="w-16 h-16" />
-                        </div>
-                        <h2 className="text-2xl font-extrabold text-indigo-950">
-                          Sessió finalitzada!
-                        </h2>
-                        <p className="text-xs text-gray-500 font-medium">
-                          Has completat els problemes de la Sèrie {selectedSerie}
-                        </p>
-                      </div>
-
-                      <div className="bg-gradient-to-r from-indigo-50 to-sky-50 rounded-2xl p-6 border border-indigo-100/50 flex items-center justify-around">
-                        <div className="text-center">
-                          <span className="text-xs text-indigo-600/80 uppercase tracking-widest font-extrabold block">
-                            Puntuació
-                          </span>
-                          <span className="text-4xl font-black text-indigo-900 block mt-1">
-                            {score} <span className="text-xl text-indigo-400 font-bold">/ {problems.length}</span>
-                          </span>
-                        </div>
-                        <div className="h-10 w-px bg-indigo-200" />
-                        <div className="text-center">
-                          <span className="text-xs text-indigo-600/80 uppercase tracking-widest font-extrabold block">
-                            Percentatge
-                          </span>
-                          <span className="text-4xl font-black text-indigo-900 block mt-1">
-                            {Math.round((score / problems.length) * 100)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-center gap-2">
-                        {[1, 2, 3, 4, 5].map((starValue) => {
-                          const limit = Math.round((score / problems.length) * 5);
-                          return (
-                            <IconSparkles 
-                              key={starValue} 
-                              className={`w-8 h-8 ${
-                                starValue <= limit ? 'text-amber-400 fill-amber-300' : 'text-gray-200'
-                              }`} 
-                            />
-                          );
-                        })}
-                      </div>
-
-                      <div className="text-left space-y-3 pt-4 border-t border-gray-100">
-                        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                          Revisió detallada dels problemes:
-                        </h4>
-                        
-                        <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-                          {userAnswersHistory.map((item, index) => (
-                            <div 
-                              key={index} 
-                              className={`p-3 rounded-xl border text-xs leading-relaxed space-y-1.5 ${
-                                item.isCorrect 
-                                  ? 'bg-emerald-50/50 border-emerald-100 text-emerald-900' 
-                                  : 'bg-rose-50/50 border-rose-100 text-rose-950'
-                              }`}
-                            >
-                              <p className="font-semibold text-slate-800">
-                                {index + 1}. {item.question}
-                              </p>
-                              <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
-                                <span className="text-gray-500">La teva resposta:</span>
-                                <span className={item.isCorrect ? 'text-emerald-700' : 'text-rose-700'}>
-                                  {item.user}
-                                </span>
-                                {!item.isCorrect && (
-                                  React.createElement(React.Fragment, null, 
-                                    React.createElement("span", { className: "text-gray-400" }, "|"),
-                                    React.createElement("span", { className: "text-gray-500" }, "Resposta correcta:"),
-                                    React.createElement("span", { className: "text-indigo-700" }, item.correct)
-                                  )
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row items-center gap-3 pt-4">
-                        <button
-                          onClick={() => startSeries(selectedSerie)}
-                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-3.5 px-4 rounded-xl transition-all shadow-md shadow-indigo-100"
-                        >
-                          Torna a intentar la Sèrie {selectedSerie}
-                        </button>
-                        <button
-                          onClick={() => setGameState('menu')}
-                          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-3.5 px-4 rounded-xl transition-all"
-                        >
-                          Llista de Sèries
-                        </button>
-                      </div>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        onClick={() => startSeries(selectedSerie)}
+                        className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold text-xs transition-all"
+                      >
+                        Repetir Sèrie
+                      </button>
+                      <button
+                        onClick={() => setGameState('menu')}
+                        className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-100 transition-all"
+                      >
+                        Tornar al Menú
+                      </button>
                     </div>
                   </div>
                 )}
@@ -969,7 +878,6 @@
           );
         }
 
-        // Renderitzat en React 18
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
