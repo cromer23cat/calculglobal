@@ -1,11 +1,11 @@
-# 🧠 El Quinzet: Càlcul Mental (Problemes Verballs / Càlcul Global)
+# 🧠 El Quinzet: Càlcul Mental (Problemes Verbals / Càlcul Global)
 
 * **Accés a l'aplicació:** <https://cromer23cat.github.io/calculglobal/>
 * **Públic objectiu:** Educació Infantil, Primària (1r a 6è) i Cicle Superior
 
 ## 📝 Descripció
 
-Aquesta aplicació web és un entorn digital interactiu basat en les **Sèries Oficials de Problemes Verballs de Càlcul Mental d'El Quinzet**. Està dissenyada per millorar la comprensió lectora/auditiva, l'agilitat en la resolució de problemes matemàtics i l'automatització de conceptes clau sense necessitat de suport de paper.
+Aquesta aplicació web és un entorn digital interactiu basat en les **Sèries Oficials de Problemes Verbals de Càlcul Mental d'El Quinzet**. Està dissenyada per millorar la comprensió lectora/auditiva, l'agilitat en la resolució de problemes matemàtics i l'automatització de conceptes clau sense necessitat de suport de paper.
 
 ## 🚀 Característiques i Funcionalitats Principals
 
